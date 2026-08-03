@@ -116,8 +116,6 @@ Chạy **5 câu hỏi đánh giá của nhóm** trên mã nguồn cá nhân tron
 **Bao nhiêu câu hỏi trả về chunk có liên quan trong top-3?** **5 / 5** câu hỏi trả về chunk có liên quan trực tiếp.
 
 **Điều hay nhất tôi học được từ thành viên khác / nhóm khác (qua demo):**
-
-**Điều hay nhất tôi học được từ thành viên khác / nhóm khác (qua demo):**
 > Tôi học được rằng mỗi chiến lược chunking có ưu/nhược riêng: Sentence-based giữ tốt câu, Recursive giữ tốt đoạn, còn Fixed-size lại ổn định về kích thước. Nhóm khác đã cho thấy nếu dùng lọc metadata phù hợp, truy xuất có thể chính xác hơn cho câu hỏi dựa trên vai trò hoặc loại tài liệu.
 
 ---

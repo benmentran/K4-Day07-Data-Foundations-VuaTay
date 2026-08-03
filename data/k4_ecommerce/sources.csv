@@ -1,3 +1,6 @@
 doc_id,file_path,title,source_url,retrieved_at,document_version,license_or_permission
-k4-returns-policy,data/k4_ecommerce/returns-policy.md,Chính sách đổi trả,https://example.com/chinh-sach/doi-tra,2026-08-02,2026.1,example-template-replace-me
-k4-seller-listing,data/k4_ecommerce/seller-listing.md,Quy định đăng bán,https://example.com/nguoi-ban/dang-ban,2026-08-02,2026.1,example-template-replace-me
+shopee-listing-policy,data/k4_ecommerce/shopee-listing-policy.md,Quy định đăng bán sản phẩm trên Shopee,https://help.shopee.vn/portal/4/article/77246,2026-08-03,not-stated,public-source
+shopee-prohibited-products,data/k4_ecommerce/shopee-prohibited-products.md,Danh sách sản phẩm bị cấm/hạn chế trên Shopee,https://help.shopee.vn/portal/4/article/77247,2026-08-03,not-stated,public-source
+shopee-return-refund,data/k4_ecommerce/shopee-return-refund.md,Chính sách trả hàng và hoàn tiền Shopee,https://help.shopee.vn/portal/4/article/77251,2026-08-03,2026-03-11,public-source
+tiki-payment-methods,data/k4_ecommerce/tiki-payment-methods.md,Phương thức thanh toán trên Tiki,https://hotro.tiki.vn/knowledge-base/post/970,2026-08-03,not-stated,public-source
+tiki-return-policy,data/k4_ecommerce/tiki-return-policy.md,Chính sách đổi trả sản phẩm Tiki,https://hotro.tiki.vn/knowledge-base/post/802-chinh-sach-doi-tra-san-pham,2026-08-03,not-stated,public-source

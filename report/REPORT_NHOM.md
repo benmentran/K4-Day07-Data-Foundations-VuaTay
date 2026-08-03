@@ -69,7 +69,7 @@ Chạy `ChunkingStrategyComparator().compare()` trên 2-3 tài liệu:
 - **Mô tả & lý do chọn cho chủ đề này:** Dùng làm đối chứng (control) cho SentenceChunker — cắt cố định theo ký tự, không quan tâm ranh giới câu/mục. Mục tiêu là đo xem việc bỏ qua cấu trúc ngữ nghĩa (so với chia theo câu) ảnh hưởng thế nào đến độ chính xác truy xuất trên cùng corpus/câu hỏi.
 - **Code snippet (nếu custom):** Không custom, dùng `FixedSizeChunker(chunk_size=400, overlap=50)` sẵn có. Script chạy: `bench_TaDangDuc_2A202601772.py` (repo root).
 
-**Chiến lược cá nhân – Trần An Thắng**
+**Thành viên 3 – Trần An Thắng (2A202601756)**
 - **Loại chiến lược:** `HeadingSectionChunker` (chunk theo heading/section).
 - **Tham số:** `chunk_size=700`, corpus `data/k4_ecommerce`.
 - **Mô tả & lý do chọn:** Tài liệu chính sách được tổ chức theo các mục Markdown; mỗi section thường là một đơn vị nghĩa tự nhiên. Section dài được hạ xuống recursive, và heading được gắn lại vào mọi mảnh con để không mất ngữ cảnh.

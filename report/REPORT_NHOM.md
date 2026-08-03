@@ -182,10 +182,39 @@ class SemanticChunker:
 
 ## Tự Đánh Giá (Phần Nhóm)
 
-| Tiêu chí | Điểm tự đánh giá |
-|----------|-------------------|
-| Lựa chọn tài liệu (Document Set Quality) | / 10 |
-| Thiết kế chiến lược (Strategy Design) | / 15 |
-| Chất lượng truy xuất (Retrieval Quality) | / 10 |
-| Thuyết trình (Demo) | / 5 |
-| **Tổng phần nhóm** | **/ 40** |
+| Tiêu chí | Điểm tự đánh giá | Điểm tối đa |
+|----------|-------------------|-------------|
+| Lựa chọn tài liệu (Document Set Quality) | **9 / 10** | 10 |
+| Thiết kế chiến lược (Strategy Design) | **13 / 15** | 15 |
+| Chất lượng truy xuất (Retrieval Quality) | **8 / 10** | 10 |
+| Thuyết trình (Demo) | **4 / 5** | 5 |
+| **Tổng phần nhóm** | **34 / 40** | 40 |
+
+**Giải thích chi tiết:**
+
+**1. Lựa chọn tài liệu (9/10):**
+- ✓ Chủ đề rõ ràng, đúng định dạng K4 (chính sách TMĐT/hỗ trợ khách hàng).
+- ✓ 5 tài liệu công khai (Shopee + Tiki), có `source_url`, `retrieved_at`, đầy đủ metadata `customer_role`, `category`, `language`, `doc_id`.
+- ✓ Data governance checklist đầy đủ.
+- ✗ Thiếu 1 điểm: corpus chỉ giới hạn 2 sàn (Shopee, Tiki) — chưa đa dạng nguồn (Lazada, TikTok Shop) để mở rộng phạm vi.
+
+**2. Thiết kế chiến lược (13/15):**
+- ✓ Baseline analysis so sánh 3 chiến lược (FixedSize, Sentence, Recursive) trên `shopee-listing-policy` với số liệu cụ thể.
+- ✓ Mỗi thành viên có chiến lược riêng (SentenceChunker, SemanticChunker) kèm code snippet và lý do chọn.
+- ✓ LuongBaoLong chọn SemanticChunker với giải thích rõ ràng (185 chunks, threshold=0.3, min=2, max=8).
+- ✓ Bảng so sánh có điểm truy xuất thực tế (LuongBaoLong 6/10).
+- ✗ Thiếu 2 điểm: chưa chạy benchmark tất cả 3 chiến lược trên cùng 5 câu hỏi để so sánh số liệu; chưa đánh giá chi phí (latency, cost) giữa các phương án.
+
+**3. Chất lượng truy xuất (8/10):**
+- ✓ 5 câu hỏi đa dạng (số liệu, điều kiện, quy trình, liệt kê, ngoại lệ cần filter).
+- ✓ Có gold answer cụ thể, có trích dẫn section.
+- ✓ Kết quả thực tế của LuongBaoLong: 4/5 relevant trong top-3 (SemanticChunker).
+- ✓ Phân tích chi tiết từng query, chỉ ra điểm yếu (Q4 thiếu chunk `shopee-prohibited-products`).
+- ✓ Metadata filter Q5 chứng minh rõ ràng tầm quan trọng của lọc metadata.
+- ✗ Thiếu 2 điểm: Q4 không retrieve được (giảm 0.5-1 điểm), chưa có bảng so sánh điểm giữa các thành viên trong nhóm (chỉ 1 thành viên báo cáo đầy đủ).
+
+**4. Thuyết trình (4/5):**
+- ✓ 5 insights chất lượng, có số liệu thực tế.
+- ✓ Bài học rõ ràng: hybrid retrieval, metadata filter, so sánh SentenceChunker vs SemanticChunker.
+- ✓ Insight mới về chunk "phổ biến" ăn điểm cao hơn chunk "cụ thể" (Q3, Q4).
+- ✗ Thiếu 1 điểm: chưa có kế hoạch demo trực quan (screencast, slides) hoặc thời gian trình bày cụ thể.

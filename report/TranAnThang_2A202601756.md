@@ -106,31 +106,31 @@ Chạy **5 câu hỏi đánh giá của nhóm** trên mã nguồn cá nhân củ
 
 | # | Câu hỏi (Query) | Top-1 Chunk truy xuất được (tóm tắt) | Điểm Score | Có liên quan không? (Relevant) | Câu trả lời của Agent (tóm tắt) |
 |---|-------|--------------------------------|-------|-----------|------------------------|
-| 1 | Khoảng 14 danh mục ngành hàng Shopee | -0.3570 | Không; đúng tài liệu ở top-2 | Chunk top-1 thuộc chính sách trả hàng, top-2 mới là `shopee-listing-policy`; offline mock không tìm đúng section C.3/C.5 ở top-1 |
-| 2 | Giấy tờ/điều kiện cho ngành hàng mỹ phẩm Shopee | -0.3397 | Không ở top-1; có tài liệu Shopee ở top-3 | Top-1 là `shopee-prohibited-products`, top-3 là `shopee-listing-policy`; cần semantic embedding để kết luận |
-| 3 | Đối tượng được áp dụng trả hàng COM | -0.4033 | Có tài liệu đúng ở top-1 | Top-1 là `shopee-return-refund`, nhưng preview chưa chắc chứa đúng section 4.1 |
-| 4 | Các loại sản phẩm bị cấm trên Shopee | -0.1825 | Không | Top-1 là `tiki-return-policy`, top-2/3 là tài liệu khác; mock thất bại |
-| 5 | Thời gian đổi trả trên Shopee | -0.4770 | Có, sau filter | Filter `source_url=.../77251` khiến cả top-3 đều là `shopee-return-refund` |
+| 1 | Khoảng 14 danh mục ngành hàng Shopee | Local: top-1 = `shopee-listing-policy` (policy chung) | 0.32 | **Không** (local: đúng tài liệu top-3, đáp án C.3 không trong top-3) | Agent DEMO |
+| 2 | Giấy tờ/điều kiện cho ngành hàng mỹ phẩm Shopee | Local: top-1 = `shopee-listing-policy` (đúng section Mỹ phẩm) | 0.71 | **Có** — "Phiếu công bố mỹ phẩm"/"Chứng nhận đại lý" | Đủ context |
+| 3 | Đối tượng được áp dụng trả hàng COM | Local: top-1 = `shopee-return-refund` (đáp án 4.1 trong top-3) | 0.30 | **Có** | Đủ context |
+| 4 | Các loại sản phẩm bị cấm trên Shopee | Local: top-1/2/3 đều `shopee-prohibited-products` | 0.41 | **Có** | Đủ context |
+| 5 | Thời gian đổi trả trên Shopee | Filter `source_url=.../77251` → top-3 toàn `shopee-return-refund` | 0.26 | **Có, sau filter** | Bắt buộc filter |
 
-**Bao nhiêu câu hỏi trả về chunk có liên quan trong top-3?** 4 / 5 theo `doc_id` (Q1, Q2, Q3, Q5; mock không đạt Q4).
+**Bao nhiêu câu hỏi trả về chunk có liên quan trong top-3?** với **local embeddings**: 5 / 5 theo doc_id; đáp án (`answer_marks`) trong top-3: 4 / 5 (Q2, Q3, Q4, Q5; Q1 thiếu).
 
 ### Benchmark đã chạy
 
 Strategy: `HeadingSectionChunker(chunk_size=700)`; corpus: `data/k4_ecommerce`; số chunk: **127**.
-Embedding offline dùng `_mock_embed` cho lần benchmark có thể tái lập. Gemini đã được thử với API key nhưng request embedding trả lỗi dịch vụ `503 UNAVAILABLE`, vì vậy không ghi kết quả Gemini như kết quả chính thức.
+Embedding **local** (`EMBEDDING_PROVIDER=local`, paraphrase-multilingual-MiniLM-L12-v2). Lần chạy mock trước đó chỉ để kiểm tra pipeline; kết quả chính thức lấy từ lần chạy local.
 
-| # | Top-1 doc_id | Filter | Top-3 có đúng tài liệu kỳ vọng? | Ghi chú |
+| # | Top-1 doc_id | Filter | Top-3 có đúng tài liệu kỳ vọng? (local) | Đáp án trong top-3? |
 |---|---|---|---|---|
-| 1 | shopee-return-refund | Không | Có ở top-2 (`shopee-listing-policy`) | Mock embedding xếp sai top-1 |
-| 2 | shopee-prohibited-products | Không | Có ở top-3 (`shopee-listing-policy`) | Mock embedding xếp sai tài liệu |
-| 3 | shopee-return-refund | Không | Có | Cần đánh giá lại bằng embedding semantic |
-| 4 | tiki-return-policy | Không | Không | Mock embedding không phù hợp để kết luận |
-| 5 | shopee-return-refund | `source_url=.../77251` | Có | Filter loại tài liệu Tiki |
+| 1 | shopee-listing-policy | Không | Có | Không (đáp án C.3 không lọt top-3) |
+| 2 | shopee-listing-policy | Không | Có | Có |
+| 3 | shopee-return-refund | Không | Có | Có |
+| 4 | shopee-prohibited-products | Không | Có | Có |
+| 5 | shopee-return-refund | `source_url=.../77251` | Có | Có |
 
-**Kết luận tạm thời:** Pipeline, heading preservation và metadata filter hoạt động; kết quả mock không đại diện cho chất lượng semantic. Cần chạy lại sau khi Gemini hết lỗi 503 để chốt điểm retrieval.
+**Kết luận chính thức:** HeadingSectionChunker giữ nguyên cấu trúc tài liệu (heading → chunk) nên 4/5 câu trả lời nằm trọn trong top-3 với embedding local — tốt nhất nhóm ở CP6. Điểm thấp còn lại ở Q1 do danh mục ngành hàng (C.3) bị trộn trong chunk lớn với nội dung khác. Metadata filter (Q5) tiếp tục chứng minh giá trị.
 
 **Điều hay nhất tôi học được từ thành viên khác / nhóm khác (qua demo):**
-> Bài học chính là metadata filter có thể loại bỏ tài liệu cùng chủ đề nhưng sai sàn/đối tượng, như Query #5. Ngoài ra, heading preservation giúp mỗi chunk vẫn biết mình thuộc section nào; tuy nhiên chất lượng cuối cùng vẫn phụ thuộc embedding semantic, nên mock không thể thay thế lần chạy Gemini.
+> Bài học chính là metadata filter có thể loại bỏ tài liệu cùng chủ đề nhưng sai sàn/đối tượng, như Query #5. Ngoài ra, heading preservation giúp mỗi chunk vẫn biết mình thuộc section nào; kết quả local embedding xác nhận heading chunk giữ đúng section chứa câu trả lời tốt hơn các chiến lược khác của nhóm.
 
 ---
 
@@ -142,5 +142,5 @@ Embedding offline dùng `_mock_embed` cho lần benchmark có thể tái lập. 
 | Hướng tiếp cận của tôi (My Approach) | 10 / 10 |
 | Hoàn thiện code (Core Implementation — tests) | 30 / 30 |
 | Dự đoán độ tương tự (Similarity Predictions) | 3 / 5 |
-| Kết quả truy xuất của tôi (Competition Results) | 8 / 10 |
-| **Tổng phần cá nhân** | **56 / 60** |
+| Kết quả truy xuất của tôi (Competition Results) | 9 / 10 |
+| **Tổng phần cá nhân** | **57 / 60** |

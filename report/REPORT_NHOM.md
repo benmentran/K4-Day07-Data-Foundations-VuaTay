@@ -1,7 +1,7 @@
 # Báo cáo Nhóm – Lab 7: Embedding & Vector Store
 
 **Nhóm:** K4 - Nhóm 1
-**Thành viên:** Trần Bình Minh
+**Thành viên:** Trần Bình Minh (2A202601434), Tạ Đăng Đức (2A202601772), Trần An Thắng (2A202601756), Trần Kiều Hạnh (2A202601760), Lương Bảo Long (2A202601682)
 **Ngày:** 2026-08-03
 
 > Nộp 1 bản / nhóm. Phần cá nhân (hướng tiếp cận, kết quả riêng, dự đoán...) mỗi thành viên nộp riêng trong `REPORT_CANHAN.md`. Chi tiết thang điểm: `docs/SCORING.md`.
@@ -75,18 +75,36 @@ Chạy `ChunkingStrategyComparator().compare()` trên 2-3 tài liệu:
 - **Mô tả & lý do chọn:** Tài liệu chính sách được tổ chức theo các mục Markdown; mỗi section thường là một đơn vị nghĩa tự nhiên. Section dài được hạ xuống recursive, và heading được gắn lại vào mọi mảnh con để không mất ngữ cảnh.
 - **Benchmark script:** `python -m src.TranAnThang_2A202601756.bench`.
 
+**Thành viên 4 – Trần Kiều Hạnh (2A202601760)**
+- **Loại chiến lược:** SentenceChunker (`max_sentences_per_chunk=2`).
+- **Tham số:** 2 câu/chunk, corpus `data/k4_ecommerce`.
+- **Mô tả & lý do chọn:** Cùng ý tưởng sentence như thành viên 1 nhưng chunk nhỏ hơn (2 câu) để đo mức ảnh hưởng của kích thước chunk lên precision — chunk nhỏ hơn ⇒ nhiều chunk hơn (299) nhưng đáp án dễ bị "nằm giữa" các chunk hơn.
+- **Benchmark script:** `python src/TranKieuHanh_2A202601760/bench.py`.
+
+**Thành viên 5 – Lương Bảo Long (2A202601682)**
+- **Loại chiến lược:** RecursiveChunker (`chunk_size=400`).
+- **Tham số:** 400 ký tự/chunk, corpus `data/k4_ecommerce`.
+- **Mô tả & lý do chọn:** Chia ưu tiên theo cấu trúc (\n\n → \n → . → space) rồi **gộp ngược** các mảnh nhỏ về đúng `chunk_size` — vừa tôn trọng ranh giới đoạn/câu, vừa giữ chunk đủ lớn để chứa trọn đáp án. Đây là chiến lược trung gian giữa fixed-size và sentence.
+- **Benchmark script:** `python src/LuongBaoLong_2A202601682/bench.py`.
+
 ---
 
 ### So Sánh Giá Trị Các Thành Viên
 
-| Thành viên | Chiến lược (Strategy) | Điểm truy xuất (/10) | Điểm mạnh | Điểm yếu |
-|-----------|----------|----------------------|-----------|----------|
-| Trần Bình Minh | SentenceChunker (3 sentences/chunk) | /10 | Giữ ngữ cảnh câu trọn vẹn, phù hợp điều khoản liệt kê | Chunk nhỏ → nhiều chunk cho 1 tài liệu, tốn bộ nhớ |
-| Tạ Đăng Đức | FixedSizeChunker (chunk_size=400, overlap=50) | 6/10 | Nạp nhanh, đơn giản; với Query #2 (điều kiện) và #5 (ngoại lệ + filter) vẫn tìm đúng chunk vì thông tin nằm gọn trong 1 đoạn liền mạch | Cắt cứng theo ký tự nên hay bổ đôi câu/mục: Query #1 (danh mục ngành hàng) và #3 (đối tượng áp dụng COM) đều KHÔNG tìm ra đúng chunk trong top-3 vì đoạn chứa câu trả lời bị tách rời khỏi phần nêu chủ đề, khiến embedding similarity lệch sang các đoạn "gần giống chủ đề" nhưng sai nội dung |
-| | | | | |
+Kết quả benchmark chính thức bằng **local embeddings** (paraphrase-multilingual-MiniLM-L12-v2, `EMBEDDING_PROVIDER=local`) trên cùng corpus và 5 câu hỏi. Chấm theo `docs/SCORING.md`: **2đ** – đáp án (`answer_marks`) trong top-3; **1đ** – đúng tài liệu trong top-3 nhưng đáp án ngoài top-3; **0đ** – không tìm thấy.
+
+| Thành viên | Chiến lược (Strategy) | #Chunk | Q1 | Q2 | Q3 | Q4 | Q5* | Điểm (/10) | Điểm mạnh | Điểm yếu |
+|-----------|----------|--------|----|----|----|----|----|-----------|-----------|----------|
+| Trần Bình Minh | SentenceChunker (3 câu) | 200 | 1 | 1 | 1 | 1 | 2 | 6/10 | Giữ ngữ cảnh câu trọn vẹn, ổn định ở Q5 filter | Đáp án nằm rải nhiều chunk nên chỉ Q5 trúng mark |
+| Trần Kiều Hạnh | SentenceChunker (2 câu) | 299 | 1 | 1 | 1 | 1 | 2 | 6/10 | Chunk nhỏ, dễ tìm đúng tài liệu | Đáp án thường "nằm giữa" các chunk, tạo nhiều chunk nhất |
+| Lương Bảo Long | RecursiveChunker (400) | 185 | 1 | 2 | 1 | 1 | 2 | 7/10 | Q2 trúng mục C.3.1 Mỹ phẩm — gộp đúng ranh giới đoạn | Danh sách dài (cấm, danh mục) trải nhiều chunk |
+| Tạ Đăng Đức | FixedSizeChunker (400, 50) | 169 | 1 | 2 | 1 | 1 | 2 | 7/10 | Q2 trúng mục Mỹ phẩm; overlap giữ biên | Cắt cứng làm đáp án Q1/Q3/Q4 lệch chunk |
+| Trần An Thắng | HeadingSectionChunker (700) | 127 | 1 | 2 | 2 | 2 | 2 | **9/10** | Giữ đúng section chứa câu trả lời (Q2-Q5) — tốt nhất nhóm | Q1: mục C.3 danh mục bị trộn trong chunk lớn với nội dung khác |
+
+*Q5 chấm trên kết quả **đã filter** `source_url=.../77251` (bắt buộc); không filter vẫn có 3/5 thành viên lẫn Tiki vào top-3.
 
 **Chiến lược nào tốt nhất cho chủ đề này? Tại sao?**
-> SentenceChunker là lựa chọn phù hợp nhất cho corpus chính sách vì các câu trong tài liệu pháp lý thường dài, chứa nhiều điều kiện và ngoại lệ. Chunk theo câu giúp giữ nguyên ngữ cảnh pháp lý, tránh cắt đứt giữa câu (ảnh hưởng đến precision). RecursiveChunker cũng tốt nhưng có thể gộp quá nhiều nội dung vào 1 chunk, làm giảm khả năng xác định chính xác câu trả lời nằm ở đâu.
+> **HeadingSectionChunker (Trần An Thắng) là tốt nhất: 9/10.** Tài liệu chính sách được viết theo cấu trúc mục (section) rõ ràng, và câu hỏi đánh giá nhắm đúng vào các section cụ thể (C.3.1 Mỹ phẩm, 4.1 COM, 4.x cấm, 3.2 thời gian) — chunk theo heading giữ trọn từng mục nên đáp án không bị cắt mất. SentenceChunker/Recursive/Fixed chỉ đạt 6-7/10 vì đáp án nằm trong câu/đoạn nhưng thường bị "kẹp" giữa các chunk hoặc bị gộp lẫn nội dung khác. Khi tài liệu không có heading chuẩn, RecursiveChunker (Long) là phương án thay thế an toàn.
 
 ---
 
@@ -109,6 +127,23 @@ Chạy `ChunkingStrategyComparator().compare()` trên 2-3 tài liệu:
 **Lưu ý về Query #5 (cần filter metadata):** Câu hỏi "Thời gian đổi trả sản phẩm là bao lâu?" không nêu rõ sàn thương mại điện tử nào. Corpus có 2 tài liệu cùng chủ đề đổi trả (Shopee và Tiki) với từ vựng tương tự nhưng đáp án khác nhau (15 ngày vs 30 ngày). Nếu không lọc metadata, retrieval có thể trả về chunks từ cả 2 tài liệu và agent đưa ra câu trả lời mơ hồ hoặc sai đối tượng. Cần dùng `metadata_filter={"source_url": "https://help.shopee.vn/portal/4/article/77251"}` để chỉ truy xuất chính sách Shopee.
 
 ### Tổng hợp chất lượng truy xuất của nhóm
+
+Kết quả chính thức (local embeddings, MiniLM-L12-v2) — đánh dấu theo `answer_marks` trong top-3:
+
+| # | Câu hỏi | Minh (Sentence 3) | Hạnh (Sentence 2) | Long (Recursive 400) | Đức (Fixed 400/50) | Thắng (Heading 700) |
+|---|---------|-------------------|-------------------|----------------------|---------------------|----------------------|
+| 1 | Số liệu – bao nhiêu danh mục? | 1 (đúng doc, đáp án C.3 ngoài top-3) | 1 | 1 | 1 | 1 |
+| 2 | Điều kiện – giấy tờ mỹ phẩm? | 1 | 1 | **2** | **2** | **2** |
+| 3 | Quy trình – đối tượng COM? | 1 | 1 | 1 | 1 | **2** |
+| 4 | Liệt kê – sản phẩm cấm? | 1 | 1 | 1 | 1 | **2** |
+| 5 | Ngoại lệ – thời gian đổi trả (sau filter) | **2** | **2** | **2** | **2** | **2** |
+| | **Tổng /10** | **6** | **6** | **7** | **7** | **9** |
+
+Nhận xét rút ra từ số liệu thật:
+- **Q5 (filter) là câu "ăn điểm" duy nhất cho mọi chiến lược** — metadata filter triệt tiêu hoàn toàn nhược điểm của embedding khi có 2 tài liệu cùng chủ đề (Shopee/Tiki).
+- **Q1 là failure case chung cả 5 thành viên:** danh mục ngành hàng nằm ở các mục C.3.1→C.3.13; chunk giữ mục đó không lọt top-3 với bất kỳ chiến lược nào (score top-1 chỉ 0.76–0.82, lạc sang chunk "hướng dẫn chung").
+- **Q2 (giấy tờ mỹ phẩm) chỉ trúng với chunk ≥ 400 ký tự** (Recursive, Fixed, Heading) — đáp án nằm gọn trong 1 đoạn dài, chunk nhỏ (Sentence 2-3 câu) tách rời "câu hỏi chủ đề" và "liệt kê giấy tờ".
+- **Q3/Q4 trúng đáp án chỉ có HeadingSectionChunker** — section 4.1 (COM) và danh sách 4.x là đơn vị mục hoàn chỉnh, chiến lược theo heading giữ trọn ranh giới mục.
 
 ### Kết quả benchmark strategy Heading/Section của Trần An Thắng
 
@@ -135,8 +170,8 @@ Gemini embedding đã được thử với API key nhưng dịch vụ trả `503
 
 **Những phân tích (insights) hay nhất nhóm sẽ trình bày:**
 > 1. Cùng một câu hỏi (đổi trả), corpus có 2 tài liệu cùng chủ đề nhưng dành cho đối tượng khác nhau (Shopee vs Tiki) → metadata filtering là bắt buộc để phân biệt.
-> 2. SentenceChunker cho điểm precision cao hơn FixedSizeChunker cho các truy vấn điều kiện/liệt kê vì giữ nguyên ngữ cảnh câu.
-> 3. FixedSizeChunker có thể cắt đứt danh sách giữa câu, gây ra retrieval không đầy đủ cho query dạng số liệu.
+> 2. Chiến lược chunk theo cấu trúc tài liệu (HeadingSectionChunker, 9/10) vượt trội chiến lược theo độ dài/ký tự (6–7/10): câu hỏi đánh giá nhắm đúng vào các section chính sách, và heading chunk giữ trọn ranh giới mục chứa câu trả lời.
+> 3. Kích thước chunk quyết định độ chính xác: đáp án dạng "liệt kê giấy tờ" nằm gọn trong 1 đoạn dài → chunk ≥ 400 ký tự (Recursive/Fixed/Heading) trúng, chunk 2-3 câu (Sentence) bị tách rời; ngược lại chunk quá lớn dễ trộn nội dung (Q1 của Thắng).
 
 **Bài học rút ra khi so sánh trong nhóm:**
 > Cùng corpus, cùng câu hỏi, nhưng chiến lược chunking khác nhau dẫn đến kết quả retrieval khác nhau. Chiến lược ảnh hưởng đến khả năng giữ ngữ cảnh (chunk coherence) và độ chính xác của retrieval (retrieval precision). Metadata schema thiết kế tốt (có `customer_role`, `source_url`, `category`) giúp phân biệt tài liệu cùng chủ đề mà không phụ thuộc vào embedding similarity.

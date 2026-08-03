@@ -54,7 +54,7 @@ Giải thích cách tiếp cận của bạn khi lập trình (implement) các p
 > Dùng regex tách câu với lookbehind: `(?<=[.!?])\s+` và `(?<=[.!?])\n` để tách ngay sau mỗi dấu chấm/cảm thán/câu hỏi, rồi bỏ câu rỗng và strip khoảng trắng. Gom tối đa `max_sentences_per_chunk` câu vào một chunk; các câu lẻ còn lại ở cuối văn bản được gom thành chunk cuối (edge case: text rỗng trả về `[]`).
 
 **`RecursiveChunker.chunk` / `_split`** — hướng tiếp cận:
-> Duyệt danh sách separator theo thứ tự ưu tiên `["\n\n", "\n", ". ", " ", ""]`. Với separator đầu tiên, tách text thành nhiều phần; phần có độ dài ≤ chunk_size thì giữ nguyên, phần dài hơn thì **đệ quy** tách tiếp bằng separator kế tiếp. Base case: hết separator hoặc gặp `sep == ""` → trả về `[current_text]`. Text rỗng trả về `[]`.
+> Duyệt danh sách separator theo thứ tự ưu tiên `["\n\n", "\n", ". ", " ", ""]`. Với separator đầu tiên, tách text thành nhiều phần; phần có độ dài ≤ chunk_size thì giữ nguyên, phần dài hơn thì **đệ quy** tách tiếp bằng separator kế tiếp. Điểm cải tiến của tôi: sau bước đệ quy, **gộp ngược (greedy merge)** các mảnh liên tiếp cho đến đủ `chunk_size` — tránh việc câu dài hơn chunk_size bị vỡ vụn thành các chunk từ đơn lẻ làm hỏng embedding tìm kiếm. Base case: hết separator hoặc gặp `sep == ""` → trả về `[current_text]`. Text rỗng trả về `[]`.
 
 ### Lớp EmbeddingStore
 
@@ -157,18 +157,18 @@ Chạy **5 câu hỏi đánh giá của nhóm** trên mã nguồn cá nhân củ
 
 | # | Câu hỏi (Query) | Top-1 Chunk truy xuất được (tóm tắt) | Điểm Score | Có liên quan không? (Relevant) | Câu trả lời của Agent (tóm tắt) |
 |---|-------|--------------------------------|-------|-----------|------------------------|
-| 1 | Quy định đăng bán sản phẩm trên Shopee liệt kê bao nhiêu danh mục ngành hàng? | Quy định mô tả sản phẩm đã qua sử dụng (shopee-listing-policy) | 0.4180 | Không (đúng tài liệu, sai nội dung — không chứa danh mục) | Agent chỉ lặp lại context, không đưa ra con số danh mục |
-| 2 | Người bán Shopee cần những giấy tờ gì để đăng bán sản phẩm thuộc ngành hàng mỹ phẩm? | Quy định hạn sử dụng của sản phẩm/thực phẩm (shopee-listing-policy) | 0.3627 | Không (đúng tài liệu, sai mục — không phải giấy tờ mỹ phẩm) | Agent không nêu được danh sách giấy tờ yêu cầu |
-| 3 | Quy trình trả hàng COM trên Shopee được áp dụng cho đối tượng nào? | Top-1: quy định nhãn hàng (shopee-listing-policy); Top-2: Điều kiện áp dụng (shopee-return-refund) | 0.3584 | Có (top-2 thuộc đúng tài liệu return-refund) | Agent trả lời chưa đúng đối tượng COM (cần top-1 chính xác) |
-| 4 | Những loại sản phẩm nào bị cấm đăng bán trên Shopee? | "Các nội dung không được phép đăng bán" (shopee-listing-policy) | 0.2748 | Có (chunk đúng chủ đề cấm đăng) | Agent trích được nội dung nghiêm cấm nhưng chưa đủ danh sách 4.1–4.28 |
-| 5 | Thời gian đổi trả sản phẩm là bao lâu? | Hàng cấm (shopee-prohibited-products); Top-2: tiki-return-policy | 0.2846 | Có (top-2 thuộc tiki-return-policy; shopee-return-refund có trong top-5) | Agent trả lời sai do mock không phân biệt Shopee vs Tiki |
+| 1 | Quy định đăng bán sản phẩm trên Shopee liệt kê bao nhiêu danh mục ngành hàng? | `shopee-listing-policy` (nội dung chung, chưa tới danh mục C.3) | 0.7592 | Đúng tài liệu, đáp án C.3 không trong top-3 | Agent DEMO |
+| 2 | Người bán Shopee cần những giấy tờ gì để đăng bán sản phẩm thuộc ngành hàng mỹ phẩm? | `shopee-listing-policy` — đúng mục C.3.1 Mỹ phẩm | 0.7147 | **Có** — "Phiếu công bố mỹ phẩm"/"Chứng nhận đại lý" trong top-3 | Đủ context để trả lời |
+| 3 | Quy trình trả hàng COM trên Shopee được áp dụng cho đối tượng nào? | `shopee-return-refund` (chunk khác section 4.1) | 0.6339 | Đúng tài liệu, đáp án 4.1 không trong top-3 | Agent DEMO |
+| 4 | Những loại sản phẩm nào bị cấm đăng bán trên Shopee? | `shopee-prohibited-products` (top-1/2) | 0.7928 | Đúng tài liệu, danh sách "Súng, vũ khí"/"ma túy" không trong top-3 | Agent DEMO |
+| 5 | Thời gian đổi trả sản phẩm là bao lâu? | Không filter: top-2 = `tiki-return-policy`; **filter** `source_url=.../77251`: top-3 toàn `shopee-return-refund` | 0.7505 | **Có** — đáp án trong top-3 sau filter | Bắt buộc filter để không lẫn Tiki |
 
-> **Lưu ý:** Bảng trên chạy với `MockEmbedder` (hash-based, không hiểu ngữ nghĩa) nên kết quả phản ánh giới hạn của mock, không phải chất lượng chiến lược. Khi chạy lại với filter metadata cho câu 5 (`metadata_filter={"source_url": ".../article/77251"}`), top-5 kết quả đều nằm trong `shopee-return-refund` — minh chứng filter hoạt động đúng: nó thu hẹp không gian tìm kiếm về đúng tài liệu của sàn cần hỏi (Shopee), không còn lẫn Tiki.
+> **Lưu ý:** Bảng trên chạy với **local embeddings** (`EMBEDDING_PROVIDER=local`, paraphrase-multilingual-MiniLM-L12-v2), chiến lược `RecursiveChunker(chunk_size=400)` — **185 chunks**. Lần chạy mock trước chỉ để kiểm luồng pipeline; kết quả chính thức lấy từ lần chạy local này.
 
-**Bao nhiêu câu hỏi trả về chunk có liên quan trong top-3?** 3 / 5
+**Bao nhiêu câu hỏi trả về chunk có liên quan trong top-3?** 5 / 5 theo doc_id; đáp án (`answer_marks`) trong top-3: 2 / 5 (Q2 và Q5).
 
 **Điều hay nhất tôi học được từ thành viên khác / nhóm khác (qua demo):**
-> Với corpus có nhiều tài liệu cùng chủ đề (Shopee vs Tiki cùng chính sách đổi trả), metadata filtering là công cụ quyết định để giữ câu trả lời đúng đối tượng; embedding similarity một mình (nhất là mock) không đủ để phân biệt nguồn tài liệu. Đồng thời, chiến lược chunking (SentenceChunker vs RecursiveChunker) ảnh hưởng trực tiếp đến việc chunk giữ được trọn ý pháp lý hay bị cắt giữa câu.
+> Với corpus có nhiều tài liệu cùng chủ đề (Shopee vs Tiki cùng chính sách đổi trả), metadata filtering là công cụ quyết định để giữ câu trả lời đúng đối tượng; embedding similarity một mình không đủ để phân biệt nguồn tài liệu. Đồng thời, so sánh trong nhóm cho thấy chiến lược tôn trọng cấu trúc tài liệu (HeadingSectionChunker của Thắng, 9/10) thắng rõ so với chunk theo câu/ký tự (6–7/10) vì đáp án chính sách nằm trọn trong một section.
 
 ---
 

@@ -1,24 +1,21 @@
 """
 bench.py — benchmark 5 câu hỏi đánh giá với strategy riêng của thành viên.
 
-Thành viên: Trần Bình Minh (2A202601434)
-Strategy  : RecursiveChunker(chunk_size=400) — chia theo mức ưu tiên separator
-            rồi gộp lại về đúng chunk_size, giữ ranh giới đoạn/câu.
+Thành viên: Lương Bảo Long (2A202601682)
+Strategy  : RecursiveChunker(chunk_size=400) — tách theo mức ưu tiên separator,
+            dùng chung chunk_size với FixedSizeChunker của nhóm để so sánh công bằng.
 
 Pipeline nạp dữ liệu ĐƯỢC DÙNG LẠI từ ingest.py (parse front matter -> chunk bằng
-CHUNKER -> gắn doc_id + metadata lên từng chunk -> nạp vào EmbeddingStore). Việc của
-bench.py chỉ là: chọn chunker riêng, nạp corpus, chạy 5 query đã chốt. Xem
-`ingest.build_knowledge_base()`.
+CHUNKER -> gắn doc_id + metadata lên từng chunk -> nạp vào EmbeddingStore).
 
   - DÒNG DUY NHẤT khác với bạn cùng nhóm: CHUNKER
-  - Embedder: dùng chung với các member (mock | local | openai) qua EMBEDDING_PROVIDER.
-    MẶC ĐỊNH LÀ MOCK — benchmark bằng mock chủ yếu kiểm luồng kỹ thuật,
-    KHÔNG phản ánh chất lượng ngữ nghĩa (ghi rõ trong bảng baseline/failure).
+  - Embedder: dùng chung (mock | local | openai) qua EMBEDDING_PROVIDER.
+  - 5 query giống hệt nhóm (report/REPORT_NHOM.md §3).
 
 Chạy:
-    python src/TranBinhMinh_2A202601434/bench.py
+    python src/LuongBaoLong_2A202601682/bench.py
     # hoặc
-    python -m src.TranBinhMinh_2A202601434.bench
+    EMBEDDING_PROVIDER=local python src/LuongBaoLong_2A202601682/bench.py
 """
 from __future__ import annotations
 
@@ -27,15 +24,14 @@ import os
 import sys
 from pathlib import Path
 
-# --- Bỏ gốc repo vào sys.path để chạy ở cả hai chế độ script / module ----------
 ROOT = Path(__file__).resolve().parents[2]
 if str(ROOT) not in sys.path:
     sys.path.insert(0, str(ROOT))
 
 from ingest import build_knowledge_base  # noqa: E402
-from src.TranBinhMinh_2A202601434.agent import KnowledgeBaseAgent  # noqa: E402
-from src.TranBinhMinh_2A202601434.chunking import RecursiveChunker  # noqa: E402
-from src.TranBinhMinh_2A202601434.embeddings import (  # noqa: E402
+from src.LuongBaoLong_2A202601682.agent import KnowledgeBaseAgent  # noqa: E402
+from src.LuongBaoLong_2A202601682.chunking import RecursiveChunker  # noqa: E402
+from src.LuongBaoLong_2A202601682.embeddings import (  # noqa: E402
     EMBEDDING_PROVIDER_ENV,
     LOCAL_EMBEDDING_MODEL,
     OPENAI_EMBEDDING_MODEL,
@@ -52,11 +48,6 @@ STRATEGY_LABEL = "RecursiveChunker(chunk_size=400)"
 
 DATA_DIR = "data/k4_ecommerce"
 
-# ---------------------------------------------------------------------------
-# 5 benchmark query đã chốt chung nhóm (report/REPORT_NHOM.md §3)
-#   - answer_marks: chuỗi đặc trưng MUST-CONTAIN để chấm ở mức chunk (CP6),
-#     không chỉ chấm theo doc_id.
-# ---------------------------------------------------------------------------
 SHOPEE_RETURN_SOURCE_URL = "https://help.shopee.vn/portal/4/article/77251"
 
 QUERIES = [
@@ -106,10 +97,6 @@ QUERIES = [
 ]
 
 
-# ---------------------------------------------------------------------------
-# Embedder — dùng CHUNG với các member, đọc từ EMBEDDING_PROVIDER (mock|local|openai).
-# Bọc cache theo hash nội dung (giảm phí API khi dùng openai).
-# ---------------------------------------------------------------------------
 class _CachedEmbed:
     def __init__(self, func):
         self._func = func
@@ -165,13 +152,10 @@ def _render_top3(results) -> str:
 
 
 def main() -> int:
-    print("=== BENCHMARK — K4 Nhóm 1 · Trần Bình Minh (2A202601434) ===")
+    print("=== BENCHMARK — K4 Nhóm 1 · Lương Bảo Long (2A202601682) ===")
     print(f"Strategy: {STRATEGY_LABEL}")
     embedder, backend = _select_embedder()
     print(f"Embedder backend: {backend}")
-    if backend == "mock":
-        print("Lưu ý: mock không biểu diễn ngữ nghĩa — chỉ kiểm luồng kỹ thuật, "
-              "focus vào số chunk / coherence / provenance (xem CP6).")
 
     print(f"\n=== Nạp corpus: {DATA_DIR} ===")
     store = build_knowledge_base(DATA_DIR, embedding_fn=embedder, chunker=CHUNKER)

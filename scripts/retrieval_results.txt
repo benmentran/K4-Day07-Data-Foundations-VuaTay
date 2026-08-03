@@ -1,0 +1,162 @@
+======================================================================
+Phan 5 - Ket qua truy xuat (Competition Results)
+======================================================================
+Embedder: LocalEmbedder
+
+Loaded 5 documents
+
+Total chunks after semantic chunking: 185
+
+Store size: 185
+
+======================================================================
+RESULTS
+======================================================================
+
+--- Query 1 ---
+Q: Quy dinh dang ban san pham tren Shopee liet ke bao nhieu danh muc nganh hang?
+Expected doc: shopee-listing-policy
+Gold: Khoang 14 danh muc nganh hang (M. pham, TP chuc nang, Thoi trang, Thiet bi dien tu,...)
+Top-3 chunks:
+  [1] score=0.5961 doc=shopee-listing-policy relevant=Y
+      preview: B. QUY ĐỊNH CHUNG:
+
+1....
+  [2] score=0.4692 doc=shopee-return-refund relevant=N
+      preview: Vui lòng tham khảo hạng thành viên tại ĐÂY; 
+
+ii. Người Mua đang sử dụng Gói ShopeeVIP. Vui lòng tha...
+  [3] score=0.4674 doc=shopee-listing-policy relevant=Y
+      preview: Mỹ phẩm
+
+d. Nước hoa
+
+e....
+Agent answer (preview): [DEMO] Bạn là một trợ lý AI thông minh, được thiết kế để trả lời câu hỏi dựa trên ngữ cảnh (context) được cung cấp.
+
+Quy tắc:
+1
+
+---
+
+Nguồn tham khảo:
+1. https://help.shopee.vn/portal/4/article/77246 (doc_id: shopee-listing-policy)
+2. https://help.shopee.vn/portal/4/article/77251 (doc_id: shopee-ret...
+
+--- Query 2 ---
+Q: Nguoi ban Shopee can nhung giay to gi de dang ban san pham thuoc nganh hang my pham?
+Expected doc: shopee-listing-policy
+Gold: Giay chung nhan cong bo, chung nhan dai ly, giay xac nhan quang cao
+Top-3 chunks:
+  [1] score=0.4676 doc=shopee-listing-policy relevant=Y
+      preview: B. QUY ĐỊNH CHUNG:
+
+1....
+  [2] score=0.4493 doc=shopee-return-refund relevant=N
+      preview: Vui lòng tham khảo hạng thành viên tại ĐÂY; 
+
+ii. Người Mua đang sử dụng Gói ShopeeVIP. Vui lòng tha...
+  [3] score=0.3957 doc=shopee-prohibited-products relevant=N
+      preview: Để hiểu rõ hơn về các mặt hàng bị cấm theo quy định tại Mục này, Người Bán vui lòng tham khảo thêm T...
+Agent answer (preview): [DEMO] Bạn là một trợ lý AI thông minh, được thiết kế để trả lời câu hỏi dựa trên ngữ cảnh (context) được cung cấp.
+
+Quy tắc:
+1
+
+---
+
+Nguồn tham khảo:
+1. https://help.shopee.vn/portal/4/article/77246 (doc_id: shopee-listing-policy)
+2. https://help.shopee.vn/portal/4/article/77251 (doc_id: shopee-ret...
+
+--- Query 3 ---
+Q: Quy trinh tra hang COM (Change of Mind) tren Shopee duoc ap dung cho doi tuong nao?
+Expected doc: shopee-return-refund
+Gold: Thanh vien CT khach hang than thiet Shopee (Vang/VIP Kim Cuong) hoac nguoi dung Goo ShopeeVIP
+Top-3 chunks:
+  [1] score=0.5292 doc=shopee-listing-policy relevant=N
+      preview: B. QUY ĐỊNH CHUNG:
+
+1....
+  [2] score=0.4862 doc=shopee-return-refund relevant=Y
+      preview: Vui lòng tham khảo hạng thành viên tại ĐÂY; 
+
+ii. Người Mua đang sử dụng Gói ShopeeVIP. Vui lòng tha...
+  [3] score=0.4803 doc=shopee-listing-policy relevant=N
+      preview: ---
+doc_id: "shopee-listing-policy"
+title: "Quy định đăng bán sản phẩm trên Shopee"
+source_url: "htt...
+Agent answer (preview): [DEMO] Bạn là một trợ lý AI thông minh, được thiết kế để trả lời câu hỏi dựa trên ngữ cảnh (context) được cung cấp.
+
+Quy tắc:
+1
+
+---
+
+Nguồn tham khảo:
+1. https://help.shopee.vn/portal/4/article/77246 (doc_id: shopee-listing-policy)
+2. https://help.shopee.vn/portal/4/article/77251 (doc_id: shopee-ret...
+
+--- Query 4 ---
+Q: Nhung loai san pham nao bi cam dang ban tren Shopee theo danh sach cam/han che?
+Expected doc: shopee-prohibited-products
+Gold: Hang vi pham ban quyen, thiet bi quan su, tai lieu phan dong, dich vu bat hop phap, sung, ma tuy, thuoc la, san pham nguoi lon, thiet bi giam sat, hoa chat nguy hiem, bo phan co the nguoi, hang gia,...
+Top-3 chunks:
+  [1] score=0.5285 doc=shopee-listing-policy relevant=N
+      preview: B. QUY ĐỊNH CHUNG:
+
+1....
+  [2] score=0.4570 doc=shopee-listing-policy relevant=N
+      preview: ---
+doc_id: "shopee-listing-policy"
+title: "Quy định đăng bán sản phẩm trên Shopee"
+source_url: "htt...
+  [3] score=0.4548 doc=shopee-return-refund relevant=N
+      preview: Vui lòng tham khảo hạng thành viên tại ĐÂY; 
+
+ii. Người Mua đang sử dụng Gói ShopeeVIP. Vui lòng tha...
+Agent answer (preview): [DEMO] Bạn là một trợ lý AI thông minh, được thiết kế để trả lời câu hỏi dựa trên ngữ cảnh (context) được cung cấp.
+
+Quy tắc:
+1
+
+---
+
+Nguồn tham khảo:
+1. https://help.shopee.vn/portal/4/article/77246 (doc_id: shopee-listing-policy)
+2. https://help.shopee.vn/portal/4/article/77246 (doc_id: shopee-lis...
+
+--- Query 5 ---
+Q: Thoi gian doi tra san pham tren Shopee la bao lau?
+Expected doc: shopee-return-refund
+Gold: Shopee: 15 ngay (don COD/chuyen khoan duoi 200tr) hoac 24h (thuc pham/tuoi song)
+Top-3 chunks:
+  [1] score=0.4680 doc=shopee-return-refund relevant=Y
+      preview: Vui lòng tham khảo hạng thành viên tại ĐÂY; 
+
+ii. Người Mua đang sử dụng Gói ShopeeVIP. Vui lòng tha...
+  [2] score=0.4505 doc=shopee-listing-policy relevant=N
+      preview: B. QUY ĐỊNH CHUNG:
+
+1....
+  [3] score=0.3940 doc=shopee-return-refund relevant=Y
+      preview: Vui lòng tham khảo chi tiết các thông tin về chi phí vận chuyển chiều hoàn trả sản phẩm của Người Bá...
+Agent answer (preview): [DEMO] Bạn là một trợ lý AI thông minh, được thiết kế để trả lời câu hỏi dựa trên ngữ cảnh (context) được cung cấp.
+
+Quy tắc:
+1
+
+---
+
+Nguồn tham khảo:
+1. https://help.shopee.vn/portal/4/article/77251 (doc_id: shopee-return-refund)
+2. https://help.shopee.vn/portal/4/article/77246 (doc_id: shopee-list...
+Filtered search (doc_id=shopee-return-refund):
+  [1] score=0.4680 doc=shopee-return-refund
+  [2] score=0.3940 doc=shopee-return-refund
+  [3] score=0.3902 doc=shopee-return-refund
+
+======================================================================
+Relevant in top-3: 4/5
+======================================================================

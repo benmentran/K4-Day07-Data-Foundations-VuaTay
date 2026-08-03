@@ -1,0 +1,43 @@
+============================================================
+Phan 4 - Du doan do tuong tu (Similarity Predictions)
+============================================================
+Embedder: LocalEmbedder
+
+Cap 1:
+  A: Chinh sach doi tra hang trong vong 30 ngay ke tu ngay mua.
+  B: Quy khach co the hoan tra san pham trong thoi han 1 thang ke tu khi nhan hang.
+  Du doan: cao
+  Thuc te: 0.5602 (cao)
+  Dung: Y
+
+Cap 2:
+  A: Thanh toan bang the tin dung Visa hoac Mastercard duoc chap nhan.
+  B: Cac phuong thuc thanh toan duoc ho tro gom: the ATM, the visa, va vi dien tu MoMo.
+  Du doan: cao
+  Thuc te: 0.6994 (cao)
+  Dung: Y
+
+Cap 3:
+  A: Phi van chuyen cho don hang duoi 500.000d la 25.000d.
+  B: Cach nau mon pho bo truyen thong Viet Nam voi nuoc dung dam da.
+  Du doan: thap
+  Thuc te: 0.4254 (thap)
+  Dung: Y
+
+Cap 4:
+  A: Chinh sach bao mat thong tin khach hang theo tieu chuan quoc te.
+  B: Chung toi cam ket bao ve du lieu ca nhan cua ban bang ma hoa SSL 256-bit.
+  Du doan: cao
+  Thuc te: 0.5264 (cao)
+  Dung: Y
+
+Cap 5:
+  A: Thoi gian giao hang tieu chuan la 3-5 ngay lam viec.
+  B: Don hang se duoc xu ly trong 24 gio va giao trong khoang 1 tuan.
+  Du doan: cao
+  Thuc te: 0.4158 (thap)
+  Dung: N
+
+============================================================
+Tong ket: 4/5 du doan dung
+============================================================

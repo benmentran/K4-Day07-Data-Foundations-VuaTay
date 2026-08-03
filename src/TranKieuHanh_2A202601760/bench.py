@@ -1,24 +1,3 @@
-<<<<<<< HEAD
-=======
-"""
-bench.py — benchmark 5 câu hỏi đánh giá với strategy riêng của thành viên.
-
-Thành viên: Trần Kiều Hạnh (2A202601760)
-Strategy  : SentenceChunker(max_sentences_per_chunk=2) — chia theo câu, 2 câu/chunk.
-
-Pipeline nạp dữ liệu ĐƯỢC DÙNG LẠI từ ingest.py (parse front matter -> chunk bằng
-CHUNKER -> gắn doc_id + metadata lên từng chunk -> nạp vào EmbeddingStore).
-
-  - DÒNG DUY NHẤT khác với bạn cùng nhóm: CHUNKER
-  - Embedder: dùng chung (mock | local | openai) qua EMBEDDING_PROVIDER.
-  - 5 query giống hệt nhóm (report/REPORT_NHOM.md §3).
-
-Chạy:
-    python src/TranKieuHanh_2A202601760/bench.py
-    # hoặc
-    EMBEDDING_PROVIDER=local python src/TranKieuHanh_2A202601760/bench.py
-"""
->>>>>>> 0400906fa21a4c6270f7a49c4e1495c9a6d13e5e
 from __future__ import annotations
 
 import hashlib
@@ -42,27 +21,16 @@ from src.TranKieuHanh_2A202601760.embeddings import (  # noqa: E402
     _mock_embed,
 )
 
-<<<<<<< HEAD
 CHUNKER = SentenceChunker(max_sentences_per_chunk=3)
 STRATEGY_LABEL = "SentenceChunker(max_sentences_per_chunk=3)"
 
 DATA_DIR = "data/k4_ecommerce"
 
-# ---------------------------------------------------------------------------
-# 5 benchmark query đã chốt chung nhóm (report/REPORT_NHOM.md §3)
-#   - answer_marks: chuỗi đặc trưng MUST-CONTAIN để chấm ở mức chunk (CP6),
-#     không chỉ chấm theo doc_id.
-# ---------------------------------------------------------------------------
-=======
-# ---------------------------------------------------------------------------
-# 1) Strategy riêng — DÒNG DUY NHẤT khác với bạn cùng nhóm
-# ---------------------------------------------------------------------------
 CHUNKER = SentenceChunker(max_sentences_per_chunk=2)
 STRATEGY_LABEL = "SentenceChunker(max_sentences_per_chunk=2)"
 
 DATA_DIR = "data/k4_ecommerce"
 
->>>>>>> 0400906fa21a4c6270f7a49c4e1495c9a6d13e5e
 SHOPEE_RETURN_SOURCE_URL = "https://help.shopee.vn/portal/4/article/77251"
 
 QUERIES = [
@@ -111,14 +79,6 @@ QUERIES = [
     },
 ]
 
-
-<<<<<<< HEAD
-# ---------------------------------------------------------------------------
-# Embedder — dùng CHUNG với các member, đọc từ EMBEDDING_PROVIDER (mock|local|openai).
-# Bọc cache theo hash nội dung (giảm phí API khi dùng openai).
-# ---------------------------------------------------------------------------
-=======
->>>>>>> 0400906fa21a4c6270f7a49c4e1495c9a6d13e5e
 class _CachedEmbed:
     def __init__(self, func):
         self._func = func
@@ -178,12 +138,10 @@ def main() -> int:
     print(f"Strategy: {STRATEGY_LABEL}")
     embedder, backend = _select_embedder()
     print(f"Embedder backend: {backend}")
-<<<<<<< HEAD
+
     if backend == "mock":
         print("Lưu ý: mock không biểu diễn ngữ nghĩa — chỉ kiểm luồng kỹ thuật, "
               "focus vào số chunk / coherence / provenance.")
-=======
->>>>>>> 0400906fa21a4c6270f7a49c4e1495c9a6d13e5e
 
     print(f"\n=== Nạp corpus: {DATA_DIR} ===")
     store = build_knowledge_base(DATA_DIR, embedding_fn=embedder, chunker=CHUNKER)

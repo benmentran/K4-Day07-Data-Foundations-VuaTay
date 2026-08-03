@@ -2,7 +2,8 @@
 bench.py — benchmark 5 câu hỏi đánh giá với strategy riêng của thành viên.
 
 Thành viên: Trần Bình Minh (2A202601434)
-Strategy  : SentenceChunker(max_sentences_per_chunk=3) — chia theo câu, 3 câu/chunk.
+Strategy  : RecursiveChunker(chunk_size=400) — chia theo mức ưu tiên separator
+            rồi gộp lại về đúng chunk_size, giữ ranh giới đoạn/câu.
 
 Pipeline nạp dữ liệu ĐƯỢC DÙNG LẠI từ ingest.py (parse front matter -> chunk bằng
 CHUNKER -> gắn doc_id + metadata lên từng chunk -> nạp vào EmbeddingStore). Việc của
@@ -33,7 +34,7 @@ if str(ROOT) not in sys.path:
 
 from ingest import build_knowledge_base  # noqa: E402
 from src.TranBinhMinh_2A202601434.agent import KnowledgeBaseAgent  # noqa: E402
-from src.TranBinhMinh_2A202601434.chunking import SentenceChunker  # noqa: E402
+from src.TranBinhMinh_2A202601434.chunking import RecursiveChunker  # noqa: E402
 from src.TranBinhMinh_2A202601434.embeddings import (  # noqa: E402
     EMBEDDING_PROVIDER_ENV,
     LOCAL_EMBEDDING_MODEL,
@@ -46,8 +47,8 @@ from src.TranBinhMinh_2A202601434.embeddings import (  # noqa: E402
 # ---------------------------------------------------------------------------
 # 1) Strategy riêng — DÒNG DUY NHẤT khác với bạn cùng nhóm
 # ---------------------------------------------------------------------------
-CHUNKER = SentenceChunker(max_sentences_per_chunk=3)
-STRATEGY_LABEL = "SentenceChunker(max_sentences_per_chunk=3)"
+CHUNKER = RecursiveChunker(chunk_size=400)
+STRATEGY_LABEL = "RecursiveChunker(chunk_size=400)"
 
 DATA_DIR = "data/k4_ecommerce"
 

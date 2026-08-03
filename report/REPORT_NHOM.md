@@ -60,9 +60,9 @@ Chạy `ChunkingStrategyComparator().compare()` trên 2-3 tài liệu:
 ### Chiến lược của từng thành viên
 
 **Thành viên 1 – Trần Bình Minh**
-- **Loại chiến lược:** SentenceChunker (chia theo câu)
-- **Mô tả & lý do chọn cho chủ đề này:** Chính sách Shopee/Tiki có nhiều điều khoản liệt kê, câu dài và phức tạp. Chia theo câu đảm bảo mỗi chunk chứa một ý trọn vẹn, giúp agent trích dẫn chính xác khi trả lời. Câu tiếng Việt thường kết thúc bằng dấu ". ", "! ", "? " nên regex phân tách ổn định.
-- **Code snippet (nếu custom):** Không cần custom, dùng `SentenceChunker(max_sentences_per_chunk=3)` sẵn có.
+- **Loại chiến lược:** RecursiveChunker (chia theo cấu trúc + gộp về `chunk_size`)
+- **Mô tả & lý do chọn cho chủ đề này:** Chính sách Shopee/Tiki có nhiều điều khoản liệt kê, câu dài và phức tạp. Chia ưu tiên theo ranh giới cấu trúc (`\n\n` → `\n` → `. ` → ` `) rồi gộp các mảnh về đúng 400 ký tự giúp mỗi chunk giữ trọn một đoạn chính sách, không cắt đứt giữa câu — vừa đủ lớn để chứa trọn câu trả lời, vừa đủ nhỏ để truy xuất chính xác.
+- **Code snippet (nếu custom):** Không cần custom, dùng `RecursiveChunker(chunk_size=400)`; có cải tiến nhỏ: `_split` gộp ngược các mảnh nhỏ để tránh chunk vỡ vụn thành từ đơn lẻ.
 
 **Thành viên 2 – Tạ Đăng Đức (2A202601772)**
 - **Loại chiến lược:** FixedSizeChunker (`chunk_size=400`, `overlap=50`)
@@ -95,7 +95,7 @@ Kết quả benchmark chính thức bằng **local embeddings** (paraphrase-mult
 
 | Thành viên | Chiến lược (Strategy) | #Chunk | Q1 | Q2 | Q3 | Q4 | Q5* | Điểm (/10) | Điểm mạnh | Điểm yếu |
 |-----------|----------|--------|----|----|----|----|----|-----------|-----------|----------|
-| Trần Bình Minh | SentenceChunker (3 câu) | 200 | 1 | 1 | 1 | 1 | 2 | 6/10 | Giữ ngữ cảnh câu trọn vẹn, ổn định ở Q5 filter | Đáp án nằm rải nhiều chunk nên chỉ Q5 trúng mark |
+| Trần Bình Minh | RecursiveChunker (400) | 185 | 1 | 2 | 1 | 1 | 2 | 7/10 | Q2 trúng mục C.3.1 Mỹ phẩm — gộp đúng ranh giới đoạn | Danh sách dài (cấm, danh mục) trải nhiều chunk |
 | Trần Kiều Hạnh | SentenceChunker (2 câu) | 299 | 1 | 1 | 1 | 1 | 2 | 6/10 | Chunk nhỏ, dễ tìm đúng tài liệu | Đáp án thường "nằm giữa" các chunk, tạo nhiều chunk nhất |
 | Lương Bảo Long | RecursiveChunker (400) | 185 | 1 | 2 | 1 | 1 | 2 | 7/10 | Q2 trúng mục C.3.1 Mỹ phẩm — gộp đúng ranh giới đoạn | Danh sách dài (cấm, danh mục) trải nhiều chunk |
 | Tạ Đăng Đức | FixedSizeChunker (400, 50) | 169 | 1 | 2 | 1 | 1 | 2 | 7/10 | Q2 trúng mục Mỹ phẩm; overlap giữ biên | Cắt cứng làm đáp án Q1/Q3/Q4 lệch chunk |
@@ -130,19 +130,19 @@ Kết quả benchmark chính thức bằng **local embeddings** (paraphrase-mult
 
 Kết quả chính thức (local embeddings, MiniLM-L12-v2) — đánh dấu theo `answer_marks` trong top-3:
 
-| # | Câu hỏi | Minh (Sentence 3) | Hạnh (Sentence 2) | Long (Recursive 400) | Đức (Fixed 400/50) | Thắng (Heading 700) |
+| # | Câu hỏi | Minh (Recursive 400) | Hạnh (Sentence 2) | Long (Recursive 400) | Đức (Fixed 400/50) | Thắng (Heading 700) |
 |---|---------|-------------------|-------------------|----------------------|---------------------|----------------------|
 | 1 | Số liệu – bao nhiêu danh mục? | 1 (đúng doc, đáp án C.3 ngoài top-3) | 1 | 1 | 1 | 1 |
-| 2 | Điều kiện – giấy tờ mỹ phẩm? | 1 | 1 | **2** | **2** | **2** |
+| 2 | Điều kiện – giấy tờ mỹ phẩm? | **2** | 1 | **2** | **2** | **2** |
 | 3 | Quy trình – đối tượng COM? | 1 | 1 | 1 | 1 | **2** |
 | 4 | Liệt kê – sản phẩm cấm? | 1 | 1 | 1 | 1 | **2** |
 | 5 | Ngoại lệ – thời gian đổi trả (sau filter) | **2** | **2** | **2** | **2** | **2** |
-| | **Tổng /10** | **6** | **6** | **7** | **7** | **9** |
+| | **Tổng /10** | **7** | **6** | **7** | **7** | **9** |
 
 Nhận xét rút ra từ số liệu thật:
 - **Q5 (filter) là câu "ăn điểm" duy nhất cho mọi chiến lược** — metadata filter triệt tiêu hoàn toàn nhược điểm của embedding khi có 2 tài liệu cùng chủ đề (Shopee/Tiki).
 - **Q1 là failure case chung cả 5 thành viên:** danh mục ngành hàng nằm ở các mục C.3.1→C.3.13; chunk giữ mục đó không lọt top-3 với bất kỳ chiến lược nào (score top-1 chỉ 0.76–0.82, lạc sang chunk "hướng dẫn chung").
-- **Q2 (giấy tờ mỹ phẩm) chỉ trúng với chunk ≥ 400 ký tự** (Recursive, Fixed, Heading) — đáp án nằm gọn trong 1 đoạn dài, chunk nhỏ (Sentence 2-3 câu) tách rời "câu hỏi chủ đề" và "liệt kê giấy tờ".
+- **Q2 (giấy tờ mỹ phẩm) chỉ trúng với chunk ≥ 400 ký tự** (Recursive của Minh & Long, Fixed, Heading) — đáp án nằm gọn trong 1 đoạn dài, chunk nhỏ (Sentence 2 câu của Hạnh) tách rời "câu hỏi chủ đề" và "liệt kê giấy tờ".
 - **Q3/Q4 trúng đáp án chỉ có HeadingSectionChunker** — section 4.1 (COM) và danh sách 4.x là đơn vị mục hoàn chỉnh, chiến lược theo heading giữ trọn ranh giới mục.
 
 ### Kết quả benchmark strategy Heading/Section của Trần An Thắng

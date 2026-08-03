@@ -91,12 +91,9 @@ class RecursiveChunker:
         rest = remaining_separators[1:]
         if sep == "":
             return [current_text]
-        parts = current_text.split(sep)
+        parts = [p.strip() for p in current_text.split(sep) if p.strip()]
         result: list[str] = []
         for part in parts:
-            part = part.strip()
-            if not part:
-                continue
             if len(part) <= self.chunk_size:
                 result.append(part)
             else:
@@ -104,7 +101,24 @@ class RecursiveChunker:
                     result.extend(self._split(part, rest))
                 else:
                     result.append(part)
-        return result
+        if len(result) <= 1:
+            return result
+        # greedy merge: recombine consecutive pieces up to chunk_size so the
+        # final chunks stay close to the target size instead of collapsing
+        # into word-level fragments.
+        merged: list[str] = []
+        buf = ""
+        for piece in result:
+            if not buf:
+                buf = piece
+            elif len(buf) + 1 + len(piece) <= self.chunk_size:
+                buf += " " + piece
+            else:
+                merged.append(buf)
+                buf = piece
+        if buf:
+            merged.append(buf)
+        return merged
 
 
 def _dot(a: list[float], b: list[float]) -> float:

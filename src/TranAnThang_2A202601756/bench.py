@@ -16,13 +16,20 @@ from . import store as _store_module
 # ingest.py intentionally imports the conventional ``src.*`` module names.
 # The personal package is selected by the repository root, so expose these
 # aliases only for this benchmark process and leave ingest.py unchanged.
-sys.modules.setdefault("src.agent", _agent_module)
-sys.modules.setdefault("src.chunking", _chunking_module)
-sys.modules.setdefault("src.embeddings", _embeddings_module)
-sys.modules.setdefault("src.models", _models_module)
-sys.modules.setdefault("src.store", _store_module)
+sys.modules["src.agent"] = _agent_module
+sys.modules["src.chunking"] = _chunking_module
+sys.modules["src.embeddings"] = _embeddings_module
+sys.modules["src.models"] = _models_module
+sys.modules["src.store"] = _store_module
 
-from ingest import build_knowledge_base
+import ingest as _ingest_module
+
+# ``src`` may already expose another student's modules through its package
+# initializer. Replace the globals captured by ingest.py as well as the
+# import aliases above, so this benchmark is genuinely personal.
+_ingest_module.EmbeddingStore = _store_module.EmbeddingStore
+_ingest_module.Document = _models_module.Document
+build_knowledge_base = _ingest_module.build_knowledge_base
 from .chunking import HeadingSectionChunker
 from .embeddings import GeminiEmbedder, _mock_embed
 

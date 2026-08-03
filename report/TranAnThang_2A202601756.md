@@ -1,6 +1,6 @@
 # Báo Cáo Cá Nhân — Lab 7: Embedding & Vector Store
 
-**Họ tên:** [Bạn điền]
+**Họ tên:** [Trần An Thắng]
 **Nhóm:** K4 - Nhóm 1
 **Ngày:** 2026-08-03
 
@@ -85,16 +85,18 @@ Vượt qua bộ kiểm thử là điều kiện tính điểm phần này.
 
 ## 4. Dự đoán độ tương tự (Similarity Predictions) — Cá nhân (5 điểm)
 
-| Cặp | Câu A | Câu B | Dự đoán | Điểm thực tế | Đúng? |
+| Cặp | Câu A | Câu B | Dự đoán | Điểm thực tế (`_mock_embed`) | Đúng? |
 |------|-----------|-----------|---------|--------------|-------|
-| 1 | | | cao / thấp | | |
-| 2 | | | cao / thấp | | |
-| 3 | | | cao / thấp | | |
-| 4 | | | cao / thấp | | |
-| 5 | | | cao / thấp | | |
+| 1 | Chính sách đổi trả áp dụng trong 30 ngày. | Khách hàng có thể trả hàng trong vòng 30 ngày. | cao | 0.017851 | Không* |
+| 2 | Người bán phải cung cấp thông tin sản phẩm chính xác. | Người bán cần đảm bảo mô tả hàng chính xác. | cao | 0.022806 | Không* |
+| 3 | Chính sách giao hàng mất 3-5 ngày. | Hình thức thanh toán bằng thẻ tín dụng. | thấp | 0.087810 | Có* |
+| 4 | Tài khoản người bán cần xác thực email. | Người bán phải xác nhận danh tính trước khi đăng bán. | cao | 0.057412 | Không* |
+| 5 | Chính sách bảo mật dữ liệu người dùng. | Hàng cấm không được phép đăng bán. | thấp | 0.021149 | Có* |
 
 **Kết quả nào bất ngờ nhất? Điều này nói gì về cách embeddings biểu diễn ý nghĩa?**
-> *Viết 2-3 câu:*
+> Kết quả mock cho thấy các cặp có nghĩa gần nhau không nhất thiết có điểm cao (cặp 1 và 2 chỉ khoảng 0.02), trong khi cặp 3 có điểm cao nhất dù chủ đề khác nhau. Đây là kết quả bất ngờ nhưng phù hợp với cảnh báo của lab: mock embedding là vector giả lập theo hash, không biểu diễn ngữ nghĩa; không nên dùng nó để đánh giá chất lượng retrieval.
+>
+> *​(*) “Đúng?” chỉ là so sánh định tính với mock score trong bộ thí nghiệm này, không phải đánh giá embedding semantic.*
 
 ---
 
@@ -104,13 +106,13 @@ Chạy **5 câu hỏi đánh giá của nhóm** trên mã nguồn cá nhân củ
 
 | # | Câu hỏi (Query) | Top-1 Chunk truy xuất được (tóm tắt) | Điểm Score | Có liên quan không? (Relevant) | Câu trả lời của Agent (tóm tắt) |
 |---|-------|--------------------------------|-------|-----------|------------------------|
-| 1 | | | | | |
-| 2 | | | | | |
-| 3 | | | | | |
-| 4 | | | | | |
-| 5 | | | | | |
+| 1 | Khoảng 14 danh mục ngành hàng Shopee | -0.3570 | Không; đúng tài liệu ở top-2 | Chunk top-1 thuộc chính sách trả hàng, top-2 mới là `shopee-listing-policy`; offline mock không tìm đúng section C.3/C.5 ở top-1 |
+| 2 | Giấy tờ/điều kiện cho ngành hàng mỹ phẩm Shopee | -0.3397 | Không ở top-1; có tài liệu Shopee ở top-3 | Top-1 là `shopee-prohibited-products`, top-3 là `shopee-listing-policy`; cần semantic embedding để kết luận |
+| 3 | Đối tượng được áp dụng trả hàng COM | -0.4033 | Có tài liệu đúng ở top-1 | Top-1 là `shopee-return-refund`, nhưng preview chưa chắc chứa đúng section 4.1 |
+| 4 | Các loại sản phẩm bị cấm trên Shopee | -0.1825 | Không | Top-1 là `tiki-return-policy`, top-2/3 là tài liệu khác; mock thất bại |
+| 5 | Thời gian đổi trả trên Shopee | -0.4770 | Có, sau filter | Filter `source_url=.../77251` khiến cả top-3 đều là `shopee-return-refund` |
 
-**Bao nhiêu câu hỏi trả về chunk có liên quan trong top-3?** __ / 5
+**Bao nhiêu câu hỏi trả về chunk có liên quan trong top-3?** 4 / 5 theo `doc_id` (Q1, Q2, Q3, Q5; mock không đạt Q4).
 
 ### Benchmark đã chạy
 
@@ -128,7 +130,7 @@ Embedding offline dùng `_mock_embed` cho lần benchmark có thể tái lập. 
 **Kết luận tạm thời:** Pipeline, heading preservation và metadata filter hoạt động; kết quả mock không đại diện cho chất lượng semantic. Cần chạy lại sau khi Gemini hết lỗi 503 để chốt điểm retrieval.
 
 **Điều hay nhất tôi học được từ thành viên khác / nhóm khác (qua demo):**
-> *Viết 2-3 câu:*
+> Bài học chính là metadata filter có thể loại bỏ tài liệu cùng chủ đề nhưng sai sàn/đối tượng, như Query #5. Ngoài ra, heading preservation giúp mỗi chunk vẫn biết mình thuộc section nào; tuy nhiên chất lượng cuối cùng vẫn phụ thuộc embedding semantic, nên mock không thể thay thế lần chạy Gemini.
 
 ---
 
@@ -136,9 +138,9 @@ Embedding offline dùng `_mock_embed` cho lần benchmark có thể tái lập. 
 
 | Tiêu chí | Điểm tự đánh giá |
 |----------|-------------------|
-| Khởi động (Warm-up) | / 5 |
-| Hướng tiếp cận của tôi (My Approach) | / 10 |
-| Hoàn thiện code (Core Implementation — tests) | / 30 |
-| Dự đoán độ tương tự (Similarity Predictions) | / 5 |
-| Kết quả truy xuất của tôi (Competition Results) | / 10 |
-| **Tổng phần cá nhân** | **/ 60** |
+| Khởi động (Warm-up) | 5 / 5 |
+| Hướng tiếp cận của tôi (My Approach) | 10 / 10 |
+| Hoàn thiện code (Core Implementation — tests) | 30 / 30 |
+| Dự đoán độ tương tự (Similarity Predictions) | 3 / 5 |
+| Kết quả truy xuất của tôi (Competition Results) | 8 / 10 |
+| **Tổng phần cá nhân** | **56 / 60** |

@@ -64,6 +64,11 @@ Chạy `ChunkingStrategyComparator().compare()` trên 2-3 tài liệu:
 - **Mô tả & lý do chọn cho chủ đề này:** Chính sách Shopee/Tiki có nhiều điều khoản liệt kê, câu dài và phức tạp. Chia theo câu đảm bảo mỗi chunk chứa một ý trọn vẹn, giúp agent trích dẫn chính xác khi trả lời. Câu tiếng Việt thường kết thúc bằng dấu ". ", "! ", "? " nên regex phân tách ổn định.
 - **Code snippet (nếu custom):** Không cần custom, dùng `SentenceChunker(max_sentences_per_chunk=3)` sẵn có.
 
+**Thành viên 2 – Tạ Đăng Đức (2A202601772)**
+- **Loại chiến lược:** FixedSizeChunker (`chunk_size=400`, `overlap=50`)
+- **Mô tả & lý do chọn cho chủ đề này:** Dùng làm đối chứng (control) cho SentenceChunker — cắt cố định theo ký tự, không quan tâm ranh giới câu/mục. Mục tiêu là đo xem việc bỏ qua cấu trúc ngữ nghĩa (so với chia theo câu) ảnh hưởng thế nào đến độ chính xác truy xuất trên cùng corpus/câu hỏi.
+- **Code snippet (nếu custom):** Không custom, dùng `FixedSizeChunker(chunk_size=400, overlap=50)` sẵn có. Script chạy: `bench_TaDangDuc_2A202601772.py` (repo root).
+
 ---
 
 ### So Sánh Giá Trị Các Thành Viên
@@ -71,7 +76,7 @@ Chạy `ChunkingStrategyComparator().compare()` trên 2-3 tài liệu:
 | Thành viên | Chiến lược (Strategy) | Điểm truy xuất (/10) | Điểm mạnh | Điểm yếu |
 |-----------|----------|----------------------|-----------|----------|
 | Trần Bình Minh | SentenceChunker (3 sentences/chunk) | /10 | Giữ ngữ cảnh câu trọn vẹn, phù hợp điều khoản liệt kê | Chunk nhỏ → nhiều chunk cho 1 tài liệu, tốn bộ nhớ |
-| | | | | |
+| Tạ Đăng Đức | FixedSizeChunker (chunk_size=400, overlap=50) | 6/10 | Nạp nhanh, đơn giản; với Query #2 (điều kiện) và #5 (ngoại lệ + filter) vẫn tìm đúng chunk vì thông tin nằm gọn trong 1 đoạn liền mạch | Cắt cứng theo ký tự nên hay bổ đôi câu/mục: Query #1 (danh mục ngành hàng) và #3 (đối tượng áp dụng COM) đều KHÔNG tìm ra đúng chunk trong top-3 vì đoạn chứa câu trả lời bị tách rời khỏi phần nêu chủ đề, khiến embedding similarity lệch sang các đoạn "gần giống chủ đề" nhưng sai nội dung |
 | | | | | |
 
 **Chiến lược nào tốt nhất cho chủ đề này? Tại sao?**
@@ -93,6 +98,8 @@ Chạy `ChunkingStrategyComparator().compare()` trên 2-3 tài liệu:
 | 4 | (Liệt kê) Những loại sản phẩm nào bị cấm đăng bán trên Shopee theo danh sách cấm/hạn chế? | Bao gồm: hàng vi phạm bản quyền, thiết bị quân sự, tài liệu phản động, dịch vụ bất hợp pháp, súng/vũ khí, chất ma túy, thuốc lá, sản phẩm người lớn, thiết bị giám sát, hóa chất nguy hiểm, bộ phận cơ thể người, hàng cấm theo luật, hàng giả/gian lận, v.v. (Mục 4 của shopee-prohibited-products, từ 4.1 đến 4.28) | shopee-prohibited-products, section 4 |
 | 5 | (Ngoại lệ – cần filter) Thời gian đổi trả sản phẩm là bao lâu? | **Shopee:** 15 ngày kể từ ngày nhận hàng (đơn hàng COD/chuyển khoản dưới 200 triệu), hoặc 24 giờ đối với sản phẩm thực phẩm/tươi sống. **Tiki:** 30 ngày kể từ ngày nhận hàng với mọi sản phẩm (ngoại trừ một vài sản phẩm đặc thù). (shopee-return-refund mục 3.2; tiki-return-policy mục 1) | shopee-return-refund section 3.2 + tiki-return-policy section 1 |
 
+**⚠️ Cần nhóm kiểm tra lại Query #1:** Khi chạy thử với `FixedSizeChunker`, mục "C.5. Danh mục ngành hàng" trong `shopee-listing-policy.md` (dòng 330-338) thực ra **không liệt kê danh mục nào** — chỉ có hướng dẫn chọn đúng danh mục. Danh sách ~13 ngành hàng (Mỹ phẩm, Thực phẩm chức năng, Thời trang..., Bách hóa Online, Mẹ & Bé, Đồng Hồ, Voucher & Dịch vụ, Đồ chơi, Nhà sách Online, Băng đĩa phim, thuốc không kê đơn...) thực chất nằm ở **Mục C.3 "Quy định riêng với một số ngành hàng"** (các mục con 3.1 → 3.13), không phải C.5. Gold answer cần sửa lại trích dẫn đúng "Mục C.3" trước khi tính điểm retrieval, nếu không câu hỏi này sẽ luôn bị chấm sai (không tài liệu/chunk nào ở C.5 chứa đáp án).
+
 **Lưu ý về Query #5 (cần filter metadata):** Câu hỏi "Thời gian đổi trả sản phẩm là bao lâu?" không nêu rõ sàn thương mại điện tử nào. Corpus có 2 tài liệu cùng chủ đề đổi trả (Shopee và Tiki) với từ vựng tương tự nhưng đáp án khác nhau (15 ngày vs 30 ngày). Nếu không lọc metadata, retrieval có thể trả về chunks từ cả 2 tài liệu và agent đưa ra câu trả lời mơ hồ hoặc sai đối tượng. Cần dùng `metadata_filter={"source_url": "https://help.shopee.vn/portal/4/article/77251"}` để chỉ truy xuất chính sách Shopee.
 
 ### Tổng hợp chất lượng truy xuất của nhóm
@@ -101,11 +108,11 @@ Chạy `ChunkingStrategyComparator().compare()` trên 2-3 tài liệu:
 
 | # | Câu hỏi | Chiến lược tốt nhất cho câu này | Có chunk liên quan trong top-3? | Ghi chú |
 |---|---------|-------------------------------|-------------------------------|---------|
-| 1 | Số liệu – bao nhiêu danh mục? | SentenceChunker | Có | FixedSizeChunker có thể cắt đứt danh sách giữa câu |
-| 2 | Điều kiện – giấy tờ mỹ phẩm? | SentenceChunker | Có | Câu trả lời nằm trong 1 câu dài, cần chunk giữ nguyên câu |
-| 3 | Quy trình – đối tượng COM? | SentenceChunker | Có | Câu trả lời nằm ở section 4.1, rõ ràng |
-| 4 | Liệt kê – sản phẩm cấm? | RecursiveChunker | Có | RecursiveChunker gộp nhiều danh sách con vào 1 chunk |
-| 5 | Ngoại lệ – thời gian đổi trả | Cần filter theo `source_url` | **Cần filter** | Không filter → lẫn Shopee/Tiki → trả lời sai |
+| 1 | Số liệu – bao nhiêu danh mục? | SentenceChunker | Có | FixedSizeChunker có thể cắt đứt danh sách giữa câu. Đối chứng thực tế (Tạ Đăng Đức, FixedSizeChunker chunk_size=400): top-3 KHÔNG chứa mục C.3 đúng nội dung — top-1 score=0.78 nhưng lạc sang đoạn "giấy phép bán lẻ rượu". |
+| 2 | Điều kiện – giấy tờ mỹ phẩm? | SentenceChunker | Có | Câu trả lời nằm trong 1 câu dài, cần chunk giữ nguyên câu. Đối chứng (FixedSizeChunker): cũng đúng (top-1 score=0.72, đúng mục 3.1 Mỹ phẩm) — câu này dễ với cả 2 chiến lược vì thông tin nằm liền mạch trong 1 đoạn ngắn. |
+| 3 | Quy trình – đối tượng COM? | SentenceChunker | Có | Câu trả lời nằm ở section 4.1, rõ ràng. Đối chứng (FixedSizeChunker): top-3 KHÔNG chứa mục 4.1 — cả 3 kết quả lạc sang mục 2, 8, 9 (điều kiện áp dụng chung, hoàn tiền) dù cùng tài liệu shopee-return-refund. |
+| 4 | Liệt kê – sản phẩm cấm? | RecursiveChunker | Có | RecursiveChunker gộp nhiều danh sách con vào 1 chunk. Đối chứng (FixedSizeChunker): một phần — top-1 chỉ là tiêu đề trang, top-2/3 lạc sang shopee-listing-policy (mục hạn sử dụng, mục cấm phân biệt chủng tộc) thay vì đúng tài liệu shopee-prohibited-products. |
+| 5 | Ngoại lệ – thời gian đổi trả | Cần filter theo `source_url` | **Cần filter** | Không filter → lẫn Shopee/Tiki → trả lời sai. Đối chứng (FixedSizeChunker) xác nhận đúng lỗi này bằng số liệu thật: `search_with_filter()` lọc đúng (chỉ trả về shopee-return-refund), nhưng gọi `agent.answer()` mặc định (không filter) thì context bị lẫn chunk từ tiki-return-policy ("365 ngày nếu sản phẩm lỗi kỹ thuật") — minh chứng sống rằng `KnowledgeBaseAgent.answer()` cần được gọi cùng kết quả đã lọc, không thể bỏ qua bước filter. |
 
 **Lọc metadata có giúp ích không? Ở câu nào?**
 > Có, lọc metadata rất hữu ích ở Query #5 (câu hỏi đổi trả). Cùng một câu hỏi, corpus chứa 2 tài liệu cùng chủ đề (Shopee và Tiki) với từ vựng gần giống nhau nhưng đáp án khác nhau (15 ngày vs 30 ngày). Khi không lọc, embedding similarity không phân biệt được nguồn gốc tài liệu → retrieval trả về chunks từ cả 2 → agent trả lời mơ hồ hoặc sai. Khi dùng `metadata_filter={"source_url": "..."}`, chỉ truy xuất chunks từ tài liệu đúng → trả lời chính xác. Đây là minh chứng rõ ràng rằng metadata filtering là cần thiết khi corpus có nhiều tài liệu cùng chủ đề nhưng dành cho đối tượng khác nhau.

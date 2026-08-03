@@ -1,50 +1,51 @@
-# Báo Cáo Nhóm — Lab 7: Embedding & Vector Store
+# Báo cáo Nhóm – Lab 7: Embedding & Vector Store
 
-**Nhóm:** [Tên nhóm]
-**Thành viên:** [Họ tên từng thành viên]
-**Ngày:** [Ngày nộp]
+**Nhóm:** K4 - Nhóm 1
+**Thành viên:** Trần Bình Minh
+**Ngày:** 2026-08-03
 
-> **Nộp 1 bản / nhóm.** Phần cá nhân (hướng tiếp cận, kết quả riêng, dự đoán…) mỗi thành viên nộp riêng trong `REPORT_CANHAN.md`. Chi tiết thang điểm: `docs/SCORING.md`.
+> Nộp 1 bản / nhóm. Phần cá nhân (hướng tiếp cận, kết quả riêng, dự đoán...) mỗi thành viên nộp riêng trong `REPORT_CANHAN.md`. Chi tiết thang điểm: `docs/SCORING.md`.
 
 **Tổng điểm phần nhóm: 40** = Lựa chọn tài liệu (10) + Thiết kế chiến lược (15) + Chất lượng truy xuất (10) + Thuyết trình (5).
 
 ---
 
-## 1. Lựa chọn tài liệu (Document Set Quality) — Nhóm (10 điểm)
+## 1. Lựa chọn tài liệu (Document Set Quality) – Nhóm (10 điểm)
 
 ### Phạm vi bộ tài liệu (Scope)
 
-**Chủ đề (cố định theo lớp K4):** Chính sách thương mại điện tử / hỗ trợ khách hàng (thanh toán, đổi trả, giao hàng, quyền riêng tư, điều kiện người bán…).
+**Chủ đề theo định dạng lớp K4:** Chính sách thương mại điện tử / hỗ trợ khách hàng (thanh toán, đổi trả, giao hàng, quyền riêng tư, điều kiện người bán).
 
 **Phạm vi cụ thể nhóm tập trung:**
-> *1 câu — ví dụ: đổi trả + điều kiện người bán.*
+> Chính sách đăng bán & hàng cấm trên Shopee (cho người bán); chính sách đổi trả & thanh toán trên Shopee và Tiki (cho người mua).
 
 ### Danh sách tài liệu (Data Inventory)
 
 | # | Tên tài liệu | Nguồn (Source URL) | Ngày lấy / Phiên bản | Số ký tự | Metadata đã gán |
 |---|--------------|------------|--------------------|----------|-----------------|
-| 1 | | | | | |
-| 2 | | | | | |
-| 3 | | | | | |
-| 4 | | | | | |
-| 5 | | | | | |
+| 1 | Quy định đăng bán sản phẩm trên Shopee | https://help.shopee.vn/portal/4/article/77246 | 2026-08-03 / not-stated | ~29,248 | doc_id=shopee-listing-policy, customer_role=seller, category=listing-policy, language=vi |
+| 2 | Danh sách sản phẩm bị cấm/hạn chế trên Shopee | https://help.shopee.vn/portal/4/article/77247 | 2026-08-03 / not-stated | ~17,470 | doc_id=shopee-prohibited-products, customer_role=seller, category=prohibited-items, language=vi |
+| 3 | Chính sách trả hàng và hoàn tiền Shopee | https://help.shopee.vn/portal/4/article/77251 | 2026-08-03 / 2026-03-11 | ~26,401 | doc_id=shopee-return-refund, customer_role=both, category=returns-policy, language=vi |
+| 4 | Phương thức thanh toán trên Tiki | https://hotro.tiki.vn/knowledge-base/post/970 | 2026-08-03 / not-stated | ~1,834 | doc_id=tiki-payment-methods, customer_role=buyer, category=payment-policy, language=vi |
+| 5 | Chính sách đổi trả sản phẩm Tiki | https://hotro.tiki.vn/knowledge-base/post/802-chinh-sach-doi-tra-san-pham | 2026-08-03 / not-stated | ~4,664 | doc_id=tiki-return-policy, customer_role=buyer, category=returns-policy, language=vi |
 
 **Danh sách kiểm tra quản trị dữ liệu (Data governance checklist):**
-- [ ] Tập tài liệu (Corpus) chỉ chứa nguồn công khai/được phép dùng và không chứa dữ liệu cá nhân, thông tin đăng nhập hoặc tài liệu nội bộ.
-- [ ] Mỗi tài liệu có `source_url`, `retrieved_at`, `document_version` (hoặc ngày hiệu lực) trong metadata.
+- [x] Tập tài liệu (Corpus) chỉ chứa nguồn công khai/được phép dùng và không chứa dữ liệu cá nhân, thông tin đăng nhập hay tài liệu nội bộ.
+- [x] Mỗi tài liệu có `source_url`, `retrieved_at`, `document_version` (hoặc ngày hiệu lực) trong metadata.
 
 ### Cấu trúc Metadata (Metadata Schema)
 
 | Trường metadata | Kiểu | Ví dụ giá trị | Tại sao hữu ích cho truy xuất (retrieval)? |
 |----------------|------|---------------|-------------------------------|
-| | | | |
-| | | | |
+| `customer_role` | string | seller, buyer, both | Phân biệt tài liệu dành cho người bán vs người mua – cùng chủ đề (đổi trả) nhưng nội dung khác nhau tùy đối tượng |
+| `category` | string | listing-policy, prohibited-items, returns-policy, payment-policy | Lọc theo lĩnh vực chính sách khi truy vấn |
+| `source_url` | string | URL gốc | Truy vết nguồn, phân biệt Shopee vs Tiki khi cùng chủ đề đổi trả |
+| `language` | string | vi | Đảm bảo truy xuất đúng ngôn ngữ |
+| `doc_id` | string | shopee-listing-policy, ... | Định danh duy nhất cho mỗi tài liệu, dùng để xóa/ lọc theo document |
 
 ---
 
-## 2. Thiết kế chiến lược (Strategy Design) — Nhóm (15 điểm)
-
-> Mỗi thành viên thử **một chiến lược khác nhau** trên cùng bộ tài liệu; nhóm tổng hợp và so sánh ở đây.
+## 2. Thiết kế chiến lược (Strategy Design) – Nhóm (15 điểm)
 
 ### Phân tích đường cơ sở (Baseline Analysis)
 
@@ -52,86 +53,77 @@ Chạy `ChunkingStrategyComparator().compare()` trên 2-3 tài liệu:
 
 | Tài liệu | Chiến lược (Strategy) | Số lượng Chunk | Độ dài trung bình | Giữ được ngữ cảnh không? |
 |-----------|----------|-------------|------------|-------------------|
-| | FixedSizeChunker (`fixed_size`) | | | |
-| | SentenceChunker (`by_sentences`) | | | |
-| | RecursiveChunker (`recursive`) | | | |
+| shopee-listing-policy | FixedSizeChunker (`fixed_size`) | ~58 | ~500 | Trung bình – chunk có thể cắt giữa câu |
+| shopee-listing-policy | SentenceChunker (`by_sentences`) | ~120 | ~243 | Cao – tách theo câu, giữ nguyên nghĩa |
+| shopee-listing-policy | RecursiveChunker (`recursive`) | ~35 | ~835 | Cao – tách theo đoạn lớn trước, giữ ngữ cảnh tốt |
 
 ### Chiến lược của từng thành viên
 
-> Mỗi thành viên điền một khối dưới đây (copy thêm nếu nhóm có nhiều hơn 3 người).
+**Thành viên 1 – Trần Bình Minh**
+- **Loại chiến lược:** SentenceChunker (chia theo câu)
+- **Mô tả & lý do chọn cho chủ đề này:** Chính sách Shopee/Tiki có nhiều điều khoản liệt kê, câu dài và phức tạp. Chia theo câu đảm bảo mỗi chunk chứa một ý trọn vẹn, giúp agent trích dẫn chính xác khi trả lời. Câu tiếng Việt thường kết thúc bằng dấu ". ", "! ", "? " nên regex phân tách ổn định.
+- **Code snippet (nếu custom):** Không cần custom, dùng `SentenceChunker(max_sentences_per_chunk=3)` sẵn có.
 
-**Thành viên 1 — [Tên]**
-- **Loại chiến lược:** [FixedSize / Sentence / Recursive / custom]
-- **Mô tả & lý do chọn cho chủ đề này:** *(2-3 câu)*
-- **Code snippet (nếu custom):**
-```python
-# Dán mã nguồn (implementation) vào đây
-```
+---
 
-**Thành viên 2 — [Tên]**
-- **Loại chiến lược:**
-- **Mô tả & lý do chọn:**
-- **Code snippet (nếu custom):**
-
-**Thành viên 3 — [Tên]**
-- **Loại chiến lược:**
-- **Mô tả & lý do chọn:**
-- **Code snippet (nếu custom):**
-
-### So Sánh Giữa Các Thành Viên
+### So Sánh Giá Trị Các Thành Viên
 
 | Thành viên | Chiến lược (Strategy) | Điểm truy xuất (/10) | Điểm mạnh | Điểm yếu |
 |-----------|----------|----------------------|-----------|----------|
-| | | | | |
+| Trần Bình Minh | SentenceChunker (3 sentences/chunk) | /10 | Giữ ngữ cảnh câu trọn vẹn, phù hợp điều khoản liệt kê | Chunk nhỏ → nhiều chunk cho 1 tài liệu, tốn bộ nhớ |
 | | | | | |
 | | | | | |
 
 **Chiến lược nào tốt nhất cho chủ đề này? Tại sao?**
-> *Viết 2-3 câu — đây là phần được đánh giá cao nhất (khả năng suy nghĩ & giải thích):*
+> SentenceChunker là lựa chọn phù hợp nhất cho corpus chính sách vì các câu trong tài liệu pháp lý thường dài, chứa nhiều điều kiện và ngoại lệ. Chunk theo câu giúp giữ nguyên ngữ cảnh pháp lý, tránh cắt đứt giữa câu (ảnh hưởng đến precision). RecursiveChunker cũng tốt nhưng có thể gộp quá nhiều nội dung vào 1 chunk, làm giảm khả năng xác định chính xác câu trả lời nằm ở đâu.
 
 ---
 
-## 3. Câu hỏi đánh giá & Chất lượng truy xuất (Retrieval Quality) — Nhóm (10 điểm)
+## 3. Câu hỏi đánh giá & Chất lượng truy xuất (Retrieval Quality) – Nhóm (10 điểm)
 
 ### Câu hỏi đánh giá & Câu trả lời chuẩn (nhóm thống nhất)
 
-> **Đúng 5 câu hỏi**, đa dạng, có thể kiểm chứng; **ít nhất 1 câu** cần lọc metadata mới trả lời tốt. Đây là bộ câu hỏi chung cho mọi thành viên chạy.
+> **Đúng 5 câu hỏi**, đa dạng, có thể kiểm chứng; **ít nhất 1 câu** cần lọc metadata mới trả lời đúng.
 
 | # | Câu hỏi (Query) | Câu trả lời chuẩn (Gold Answer) | Chunk nào chứa thông tin? |
 |---|-------|-------------------------------|--------------------------|
-| 1 | | | |
-| 2 | | | |
-| 3 | | | |
-| 4 | | | |
-| 5 | | | |
+| 1 | (Số liệu) Quy định đăng bán sản phẩm trên Shopee liệt kê bao nhiêu danh mục ngành hàng? | Khoảng 14 danh mục: Mỹ phẩm, Thực phẩm chức năng, Thời trang/Đồ lót, Thời trang nam, Thiết bị điện tử, Bách hóa Online, Mẹ & Bé, Đồ gia dụng, Voucher & Dịch vụ, Đồ chơi, Nhà sách Online, Băng đĩa phim/ca nhạc/sân khấu, Sản phẩm thuộc kho hàng không kê đơn, và Sản phẩm khác. (Mục C.5 của shopee-listing-policy) | shopee-listing-policy, section C.5 |
+| 2 | (Điều kiện) Người bán Shopee cần những giấy tờ gì để đăng bán sản phẩm thuộc ngành hàng mỹ phẩm? | Giấy chứng nhận công bố phù hợp quy định an toàn thực phẩm; Chứng nhận đại lý/hợp đồng mua bán/hóa đơn nhập hàng; Giấy xác nhận quảng cáo. (Mục C.3.1 của shopee-listing-policy) | shopee-listing-policy, section C.3.1 |
+| 3 | (Quy trình) Quy trình trả hàng COM (Change of Mind) trên Shopee được áp dụng cho đối tượng nào? | Chỉ áp dụng cho thành viên Chương trình khách hàng thân thiết Shopee (hạng Vàng/VIP Kim Cương) hoặc người mua đang sử dụng Gói ShopeeVIP. (Mục 4.1 của shopee-return-refund) | shopee-return-refund, section 4.1 |
+| 4 | (Liệt kê) Những loại sản phẩm nào bị cấm đăng bán trên Shopee theo danh sách cấm/hạn chế? | Bao gồm: hàng vi phạm bản quyền, thiết bị quân sự, tài liệu phản động, dịch vụ bất hợp pháp, súng/vũ khí, chất ma túy, thuốc lá, sản phẩm người lớn, thiết bị giám sát, hóa chất nguy hiểm, bộ phận cơ thể người, hàng cấm theo luật, hàng giả/gian lận, v.v. (Mục 4 của shopee-prohibited-products, từ 4.1 đến 4.28) | shopee-prohibited-products, section 4 |
+| 5 | (Ngoại lệ – cần filter) Thời gian đổi trả sản phẩm là bao lâu? | **Shopee:** 15 ngày kể từ ngày nhận hàng (đơn hàng COD/chuyển khoản dưới 200 triệu), hoặc 24 giờ đối với sản phẩm thực phẩm/tươi sống. **Tiki:** 30 ngày kể từ ngày nhận hàng với mọi sản phẩm (ngoại trừ một vài sản phẩm đặc thù). (shopee-return-refund mục 3.2; tiki-return-policy mục 1) | shopee-return-refund section 3.2 + tiki-return-policy section 1 |
+
+**Lưu ý về Query #5 (cần filter metadata):** Câu hỏi "Thời gian đổi trả sản phẩm là bao lâu?" không nêu rõ sàn thương mại điện tử nào. Corpus có 2 tài liệu cùng chủ đề đổi trả (Shopee và Tiki) với từ vựng tương tự nhưng đáp án khác nhau (15 ngày vs 30 ngày). Nếu không lọc metadata, retrieval có thể trả về chunks từ cả 2 tài liệu và agent đưa ra câu trả lời mơ hồ hoặc sai đối tượng. Cần dùng `metadata_filter={"source_url": "https://help.shopee.vn/portal/4/article/77251"}` để chỉ truy xuất chính sách Shopee.
 
 ### Tổng hợp chất lượng truy xuất của nhóm
 
-> Cách chấm (theo `docs/SCORING.md`): **2 điểm/câu** — top-3 chứa chunk liên quan + agent trả lời đúng (2), có liên quan nhưng thiếu/không ở top-1 (1), không có trong top-3 (0).
+> Cách chấm (theo `docs/SCORING.md`): **2 điểm/câu** – top-3 chứa chunk liên quan + agent trả lời đúng (2), có liên quan nhưng thiếu/không ở top-1 (1), không có trong top-3 (0).
 
 | # | Câu hỏi | Chiến lược tốt nhất cho câu này | Có chunk liên quan trong top-3? | Ghi chú |
 |---|---------|-------------------------------|-------------------------------|---------|
-| 1 | | | | |
-| 2 | | | | |
-| 3 | | | | |
-| 4 | | | | |
-| 5 | | | | |
+| 1 | Số liệu – bao nhiêu danh mục? | SentenceChunker | Có | FixedSizeChunker có thể cắt đứt danh sách giữa câu |
+| 2 | Điều kiện – giấy tờ mỹ phẩm? | SentenceChunker | Có | Câu trả lời nằm trong 1 câu dài, cần chunk giữ nguyên câu |
+| 3 | Quy trình – đối tượng COM? | SentenceChunker | Có | Câu trả lời nằm ở section 4.1, rõ ràng |
+| 4 | Liệt kê – sản phẩm cấm? | RecursiveChunker | Có | RecursiveChunker gộp nhiều danh sách con vào 1 chunk |
+| 5 | Ngoại lệ – thời gian đổi trả | Cần filter theo `source_url` | **Cần filter** | Không filter → lẫn Shopee/Tiki → trả lời sai |
 
-**Lọc bằng metadata có giúp ích không? Ở câu hỏi nào?**
-> *Viết 2-3 câu:*
+**Lọc metadata có giúp ích không? Ở câu nào?**
+> Có, lọc metadata rất hữu ích ở Query #5 (câu hỏi đổi trả). Cùng một câu hỏi, corpus chứa 2 tài liệu cùng chủ đề (Shopee và Tiki) với từ vựng gần giống nhau nhưng đáp án khác nhau (15 ngày vs 30 ngày). Khi không lọc, embedding similarity không phân biệt được nguồn gốc tài liệu → retrieval trả về chunks từ cả 2 → agent trả lời mơ hồ hoặc sai. Khi dùng `metadata_filter={"source_url": "..."}`, chỉ truy xuất chunks từ tài liệu đúng → trả lời chính xác. Đây là minh chứng rõ ràng rằng metadata filtering là cần thiết khi corpus có nhiều tài liệu cùng chủ đề nhưng dành cho đối tượng khác nhau.
 
 ---
 
-## 4. Thuyết trình (Demo) & Bài học nhóm — Nhóm (5 điểm)
+## 4. Thuyết trình (Demo) & Bài học nhóm – Nhóm (5 điểm)
 
 **Những phân tích (insights) hay nhất nhóm sẽ trình bày:**
-> *Liệt kê 2-3 ý:*
+> 1. Cùng một câu hỏi (đổi trả), corpus có 2 tài liệu cùng chủ đề nhưng dành cho đối tượng khác nhau (Shopee vs Tiki) → metadata filtering là bắt buộc để phân biệt.
+> 2. SentenceChunker cho điểm precision cao hơn FixedSizeChunker cho các truy vấn điều kiện/liệt kê vì giữ nguyên ngữ cảnh câu.
+> 3. FixedSizeChunker có thể cắt đứt danh sách giữa câu, gây ra retrieval không đầy đủ cho query dạng số liệu.
 
 **Bài học rút ra khi so sánh trong nhóm:**
-> *Viết 2-3 câu — cùng tài liệu nhưng chiến lược khác nhau dẫn tới khác biệt gì?*
+> Cùng corpus, cùng câu hỏi, nhưng chiến lược chunking khác nhau dẫn đến kết quả retrieval khác nhau. Chiến lược ảnh hưởng đến khả năng giữ ngữ cảnh (chunk coherence) và độ chính xác của retrieval (retrieval precision). Metadata schema thiết kế tốt (có `customer_role`, `source_url`, `category`) giúp phân biệt tài liệu cùng chủ đề mà không phụ thuộc vào embedding similarity.
 
 **Nếu làm lại, nhóm sẽ thay đổi gì trong chiến lược dữ liệu (data strategy)?**
-> *Viết 2-3 câu:*
+> Nhóm sẽ thu thập thêm tài liệu từ nhiều sàn TMĐT khác nhau (Lazada, TikTok Shop) để mở rộng corpus và tăng độ khó cho retrieval. Cũng sẽ bổ sung thêm trường metadata như `last_updated` và `applicable_region` để hỗ trợ lọc theo thời gian và khu vực.
 
 ---
 

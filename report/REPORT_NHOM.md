@@ -183,10 +183,38 @@ Gemini embedding đã được thử với API key nhưng dịch vụ trả `503
 
 ## Tự Đánh Giá (Phần Nhóm)
 
-| Tiêu chí | Điểm tự đánh giá |
-|----------|-------------------|
-| Lựa chọn tài liệu (Document Set Quality) | / 10 |
-| Thiết kế chiến lược (Strategy Design) | / 15 |
-| Chất lượng truy xuất (Retrieval Quality) | / 10 |
-| Thuyết trình (Demo) | / 5 |
-| **Tổng phần nhóm** | **/ 40** |
+| Tiêu chí | Điểm tự đánh giá | Điểm tối đa |
+|----------|-------------------|-------------|
+| Lựa chọn tài liệu (Document Set Quality) | **9 / 10** | 10 |
+| Thiết kế chiến lược (Strategy Design) | **13 / 15** | 15 |
+| Chất lượng truy xuất (Retrieval Quality) | **8 / 10** | 10 |
+| Thuyết trình (Demo) | **4 / 5** | 5 |
+| **Tổng phần nhóm** | **34 / 40** | 40 |
+
+**Giải thích chi tiết:**
+
+**1. Lựa chọn tài liệu (9/10):**
+- ✓ Chủ đề rõ ràng, đúng định dạng K4 (chính sách TMĐT/hỗ trợ khách hàng).
+- ✓ 5 tài liệu công khai (Shopee + Tiki), có `source_url`, `retrieved_at`, đầy đủ metadata `customer_role`, `category`, `language`, `doc_id`.
+- ✓ Data governance checklist đầy đủ.
+- ✗ Trừ 1 điểm: corpus chỉ giới hạn 2 sàn (Shopee, Tiki) — chưa đa dạng nguồn (Lazada, TikTok Shop) để mở rộng phạm vi.
+
+**2. Thiết kế chiến lược (13/15):**
+- ✓ Đã chạy baseline analysis so sánh 3 chiến lược (FixedSize, Sentence, Recursive) trên `shopee-listing-policy` với số liệu cụ thể (44/79/53 chunks).
+- ✓ Mỗi thành viên có chiến lược riêng (Sentence 3 câu, Sentence 2 câu, Recursive 400, Fixed 400/50, HeadingSection 700) kèm code snippet, tham số, lý do chọn.
+- ✓ Có bảng benchmark đầy đủ 5 thành viên với local embeddings (MiniLM-L12-v2) — điểm số cụ thể từng thành viên (6/10, 7/10, 9/10).
+- ✓ Rút ra chiến lược tốt nhất: HeadingSectionChunker (9/10).
+- ✗ Trừ 2 điểm: chưa benchmark đầy đủ với Gemini/local embedding so sánh trên cùng 5 câu hỏi; chưa đánh giá chi phí (latency, cost) giữa các phương án.
+
+**3. Chất lượng truy xuất (8/10):**
+- ✓ 5 câu hỏi đa dạng (số liệu, điều kiện, quy trình, liệt kê, ngoại lệ cần filter).
+- ✓ Có gold answer cụ thể, có trích dẫn section.
+- ✓ Đã phát hiện vấn đề Query #1 (gold answer trỏ C.5 nhưng đáp án thực tế ở C.3) — chứng tỏ chất lượng review cao.
+- ✓ Có insight rõ ràng: Q5 chỉ "ăn điểm" khi filter; Q1 failure case chung; Q3/Q4 chỉ HeadingSectionChunker trúng; Q2 cần chunk ≥400 ký tự.
+- ✗ Trừ 2 điểm: Q1 vẫn là failure chung (giảm ~1 điểm); chưa có báo cáo chi tiết điểm retrieval giữa các thành viên trên cùng embedder (mock vs local chưa thống nhất).
+
+**4. Thuyết trình (4/5):**
+- ✓ Có 3 insights chất lượng, có số liệu thực tế đi kèm.
+- ✓ Bài học rõ ràng: metadata filter bắt buộc ở Q5; chunk theo heading vượt trội chunk theo độ dài; kích thước chunk quyết định precision.
+- ✓ Có phần "Nếu làm lại, sẽ thay đổi gì" thể hiện tư duy cải tiến.
+- ✗ Trừ 1 điểm: chưa có kế hoạch demo trực quan (screencast, slides), chưa phân công thời gian/thuyết trình viên cụ thể.

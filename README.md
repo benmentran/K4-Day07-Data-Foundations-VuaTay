@@ -4,6 +4,18 @@
 
 ---
 
+## Thành Viên Nhóm — K4 Nhóm 1
+
+| STT | Họ và tên | Mã số sinh viên |
+|-----|-----------|-----------------|
+| 1 | Trần Bình Minh | 2A202601434 |
+| 2 | Lương Bảo Long | 2A202601682 |
+| 3 | Tạ Đăng Đức | 2A202601772 |
+| 4 | Trần Kiều Hạnh | 2A202601760 |
+| 5 | Trần An Thắng | 2A202601756 |
+
+---
+
 ## Mục Tiêu
 
 Sau bài thực hành (lab) này, bạn cần có thể:

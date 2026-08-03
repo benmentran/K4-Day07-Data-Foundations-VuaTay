@@ -7,8 +7,8 @@ from pathlib import Path
 from dotenv import load_dotenv
 
 from ingest import build_knowledge_base
-from src.agent import KnowledgeBaseAgent
-from src.embeddings import (
+from src.TranBinhMinh_2A202601434.agent import KnowledgeBaseAgent
+from src.TranBinhMinh_2A202601434.embeddings import (
     EMBEDDING_PROVIDER_ENV,
     LOCAL_EMBEDDING_MODEL,
     OPENAI_EMBEDDING_MODEL,

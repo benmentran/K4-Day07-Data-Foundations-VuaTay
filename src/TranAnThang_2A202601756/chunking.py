@@ -150,6 +150,52 @@ class RecursiveChunker:
         return chunks
 
 
+class HeadingSectionChunker:
+    """Split Markdown into heading-based sections and preserve heading context.
+
+    A section is kept intact when it fits ``chunk_size``. Longer sections are
+    split recursively, with the section heading prepended to every child chunk.
+    """
+
+    HEADING_RE = re.compile(r"(?m)^(#{1,6})\s+(.+?)\s*$")
+
+    def __init__(self, chunk_size: int = 700) -> None:
+        self.chunk_size = max(1, chunk_size)
+        self._recursive = RecursiveChunker(chunk_size=chunk_size)
+
+    def chunk(self, text: str) -> list[str]:
+        if not text or not text.strip():
+            return []
+        matches = list(self.HEADING_RE.finditer(text))
+        if not matches:
+            return self._recursive.chunk(text)
+
+        sections: list[tuple[str, str]] = []
+        if text[: matches[0].start()].strip():
+            sections.append(("", text[: matches[0].start()].strip()))
+        for index, match in enumerate(matches):
+            end = matches[index + 1].start() if index + 1 < len(matches) else len(text)
+            heading = match.group(0).strip()
+            body = text[match.end():end].strip()
+            sections.append((heading, body))
+
+        chunks: list[str] = []
+        for heading, body in sections:
+            prefix = f"{heading}\n" if heading else ""
+            if not body:
+                if heading:
+                    chunks.append(heading)
+                continue
+            whole = f"{prefix}{body}".strip()
+            if len(whole) <= self.chunk_size:
+                chunks.append(whole)
+                continue
+            child_size = max(1, self.chunk_size - len(prefix))
+            for child in RecursiveChunker(chunk_size=child_size).chunk(body):
+                chunks.append(f"{prefix}{child}".strip())
+        return chunks
+
+
 def _dot(a: list[float], b: list[float]) -> float:
     return sum(x * y for x, y in zip(a, b))
 

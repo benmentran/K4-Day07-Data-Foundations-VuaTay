@@ -53,9 +53,9 @@ Chạy `ChunkingStrategyComparator().compare()` trên 2-3 tài liệu:
 
 | Tài liệu | Chiến lược (Strategy) | Số lượng Chunk | Độ dài trung bình | Giữ được ngữ cảnh không? |
 |-----------|----------|-------------|------------|-------------------|
-| shopee-listing-policy | FixedSizeChunker (`fixed_size`) | ~58 | ~500 | Trung bình – chunk có thể cắt giữa câu |
-| shopee-listing-policy | SentenceChunker (`by_sentences`) | ~120 | ~243 | Cao – tách theo câu, giữ nguyên nghĩa |
-| shopee-listing-policy | RecursiveChunker (`recursive`) | ~35 | ~835 | Cao – tách theo đoạn lớn trước, giữ ngữ cảnh tốt |
+| shopee-listing-policy | FixedSizeChunker (`fixed_size`) | 44 | 495.5 | Trung bình – chunk có thể cắt giữa câu |
+| shopee-listing-policy | SentenceChunker (`by_sentences`) | 79 | 273.2 | Cao – tách theo câu, giữ nguyên nghĩa |
+| shopee-listing-policy | RecursiveChunker (`recursive`) | 53 | 409.2 | Khá cao – ưu tiên tách theo đoạn/câu nhưng vẫn giữ giới hạn chunk |
 
 ### Chiến lược của từng thành viên
 
@@ -68,6 +68,12 @@ Chạy `ChunkingStrategyComparator().compare()` trên 2-3 tài liệu:
 - **Loại chiến lược:** FixedSizeChunker (`chunk_size=400`, `overlap=50`)
 - **Mô tả & lý do chọn cho chủ đề này:** Dùng làm đối chứng (control) cho SentenceChunker — cắt cố định theo ký tự, không quan tâm ranh giới câu/mục. Mục tiêu là đo xem việc bỏ qua cấu trúc ngữ nghĩa (so với chia theo câu) ảnh hưởng thế nào đến độ chính xác truy xuất trên cùng corpus/câu hỏi.
 - **Code snippet (nếu custom):** Không custom, dùng `FixedSizeChunker(chunk_size=400, overlap=50)` sẵn có. Script chạy: `bench_TaDangDuc_2A202601772.py` (repo root).
+
+**Chiến lược cá nhân – Trần An Thắng**
+- **Loại chiến lược:** `HeadingSectionChunker` (chunk theo heading/section).
+- **Tham số:** `chunk_size=700`, corpus `data/k4_ecommerce`.
+- **Mô tả & lý do chọn:** Tài liệu chính sách được tổ chức theo các mục Markdown; mỗi section thường là một đơn vị nghĩa tự nhiên. Section dài được hạ xuống recursive, và heading được gắn lại vào mọi mảnh con để không mất ngữ cảnh.
+- **Benchmark script:** `python -m src.TranAnThang_2A202601756.bench`.
 
 ---
 
@@ -103,6 +109,12 @@ Chạy `ChunkingStrategyComparator().compare()` trên 2-3 tài liệu:
 **Lưu ý về Query #5 (cần filter metadata):** Câu hỏi "Thời gian đổi trả sản phẩm là bao lâu?" không nêu rõ sàn thương mại điện tử nào. Corpus có 2 tài liệu cùng chủ đề đổi trả (Shopee và Tiki) với từ vựng tương tự nhưng đáp án khác nhau (15 ngày vs 30 ngày). Nếu không lọc metadata, retrieval có thể trả về chunks từ cả 2 tài liệu và agent đưa ra câu trả lời mơ hồ hoặc sai đối tượng. Cần dùng `metadata_filter={"source_url": "https://help.shopee.vn/portal/4/article/77251"}` để chỉ truy xuất chính sách Shopee.
 
 ### Tổng hợp chất lượng truy xuất của nhóm
+
+### Kết quả benchmark strategy Heading/Section của Trần An Thắng
+
+Đã chạy `python -m src.TranAnThang_2A202601756.bench` trên `data/k4_ecommerce` với `HeadingSectionChunker(chunk_size=700)`, tạo **127 chunks**. Bản chạy offline bằng mock embedding cho kết quả: Q1 đúng tài liệu kỳ vọng ở top-2; Q2 ở top-3; Q3 có Shopee ở top-1; Q4 không có Shopee trong top-3; Q5 sau filter chỉ trả về chunks của `shopee-return-refund`. Đây là kết quả kiểm tra pipeline, không dùng để chấm semantic vì mock embedding gần như ngẫu nhiên.
+
+Gemini embedding đã được thử với API key nhưng dịch vụ trả `503 UNAVAILABLE` trong lúc embed corpus; do đó chưa ghi nhận điểm Gemini chính thức và cần chạy lại khi API ổn định.
 
 > Cách chấm (theo `docs/SCORING.md`): **2 điểm/câu** – top-3 chứa chunk liên quan + agent trả lời đúng (2), có liên quan nhưng thiếu/không ở top-1 (1), không có trong top-3 (0).
 

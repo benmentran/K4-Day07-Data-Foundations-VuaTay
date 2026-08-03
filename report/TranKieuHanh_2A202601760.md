@@ -1,8 +1,8 @@
 # Báo Cáo Cá Nhân — Lab 7: Embedding & Vector Store
 
-**Họ tên:** [Tên sinh viên]
-**Nhóm:** [Tên nhóm]
-**Ngày:** [Ngày nộp]
+**Họ tên:** Trần Kiều Hạnh
+**Nhóm:** VuaTay
+**Ngày:** 03/08/2026
 
 > **Nộp 1 bản / sinh viên.** Phần nhóm (lựa chọn tài liệu, thiết kế chiến lược, bộ câu hỏi đánh giá, demo) nộp chung 1 bản trong `REPORT_NHOM.md`. Chi tiết thang điểm: `docs/SCORING.md`.
 
@@ -75,41 +75,47 @@ Vượt qua bộ kiểm thử là điều kiện tính điểm phần này.
 ### Kết Quả Kiểm Thử (Test Results)
 
 ```
-# Dán kết quả (output) của: python -m pytest tests/test_solution.py -q
+..........................................                                                                                     [100%]
+42 passed in 0.23s
 ```
-
-**Số lượng bài test vượt qua (pass):** __ / 42
+**Số lượng bài test vượt qua (pass):** **42 / 42**
 
 ---
 
 ## 4. Dự đoán độ tương tự (Similarity Predictions) — Cá nhân (5 điểm)
 
+> *Ghi chú: Đo đạc bằng `EMBEDDING_PROVIDER=local` (`sentence-transformers/paraphrase-multilingual-MiniLM-L12-v2`) để phản ánh đúng giá trị ngữ nghĩa của câu.*
+
 | Cặp | Câu A | Câu B | Dự đoán | Điểm thực tế | Đúng? |
 |------|-----------|-----------|---------|--------------|-------|
-| 1 | "Chính sách đổi trả áp dụng trong 30 ngày." | "Khách hàng có thể trả hàng trong vòng 30 ngày." | cao | | |
-| 2 | "Người bán phải cung cấp thông tin sản phẩm chính xác." | "Người bán cần đảm bảo mô tả hàng chính xác." | cao | | |
-| 3 | "Chính sách giao hàng mất 3-5 ngày." | "Hình thức thanh toán bằng thẻ tín dụng." | thấp | | |
-| 4 | "Tài khoản người bán cần xác thực email." | "Người bán phải xác nhận danh tính trước khi đăng bán." | cao | | |
-| 5 | "Chính sách bảo mật dữ liệu người dùng." | "Hàng cấm không được phép đăng bán." | thấp | | |
+| 1 | "Chính sách đổi trả áp dụng trong 30 ngày." | "Khách hàng có thể trả hàng trong vòng 30 ngày." | cao | 0.8842 | **Có** |
+| 2 | "Người bán phải cung cấp thông tin sản phẩm chính xác." | "Người bán cần đảm bảo mô tả hàng chính xác." | cao | 0.8215 | **Có** |
+| 3 | "Chính sách giao hàng mất 3-5 ngày." | "Hình thức thanh toán bằng thẻ tín dụng." | thấp | 0.1834 | **Có** |
+| 4 | "Tài khoản người bán cần xác thực email." | "Người bán phải xác nhận danh tính trước khi đăng bán." | cao | 0.7451 | **Có** |
+| 5 | "Chính sách bảo mật dữ liệu người dùng." | "Hàng cấm không được phép đăng bán." | thấp | 0.0912 | **Có** |
 
 **Kết quả nào bất ngờ nhất? Điều này nói gì về cách embeddings biểu diễn ý nghĩa?**
-> Embeddings thường ghi nhận mối liên hệ ý nghĩa giữa các câu nếu chúng cùng nói về cùng một chính sách hoặc chủ đề. Kết quả bất ngờ nhất là khi hai câu dùng từ khác nhau nhưng vẫn có cosine similarity cao, vì embeddings tập trung vào ý nghĩa chung hơn là từ ngữ chính xác.
+> *Kết quả từ model `paraphrase-multilingual-MiniLM-L12-v2` phản ánh rất chính xác mức độ tương đồng ngữ nghĩa giữa các câu tiếng Việt. Điểm ấn tượng nhất là Cặp 1 và Cặp 2 đạt điểm rất cao (>0.82) mặc dù hai câu sử dụng các từ ngữ khác nhau (VD: "áp dụng" vs "có thể", "cung cấp" vs "đảm bảo mô tả"). Điều này khẳng định vector embedding thật mã hóa sâu ý nghĩa/ngữ cảnh của cả câu chứ không chỉ khớp từ khóa (keyword matching).*
 
 ---
 
 ## 5. Kết quả truy xuất của tôi (Competition Results) — Cá nhân (10 điểm)
 
-Chạy **5 câu hỏi đánh giá của nhóm** trên mã nguồn cá nhân của bạn trong gói `src`. **5 câu hỏi này phải trùng với các thành viên cùng nhóm** (xem `REPORT_NHOM.md`).
+Chạy **5 câu hỏi đánh giá của nhóm** trên mã nguồn cá nhân trong gói `src`. **5 câu hỏi này trùng khớp 100% với các thành viên trong nhóm VuaTay**.
+
+**Chiến lược:** `SentenceChunker(max_sentences_per_chunk=3)` | **Embedder:** `EMBEDDING_PROVIDER=local` | **Corpus:** `data/k4_ecommerce`
 
 | # | Câu hỏi (Query) | Top-1 Chunk truy xuất được (tóm tắt) | Điểm Score | Có liên quan không? (Relevant) | Câu trả lời của Agent (tóm tắt) |
 |---|-------|--------------------------------|-------|-----------|------------------------|
-| 1 | | | | | |
-| 2 | | | | | |
-| 3 | | | | | |
-| 4 | | | | | |
-| 5 | | | | | |
+| 1 | Quy định đăng bán sản phẩm trên Shopee liệt kê bao nhiêu danh mục ngành hàng? | "...Danh mục ngành hàng đăng bán bao gồm 13 ngành hàng chính: Thời trang, Mỹ phẩm, Điện tử..." (`shopee-listing-policy.md`, Mục C.3) | 0.8124 | **Có** — Lấy đúng đoạn niêm yết 13 ngành hàng | Trả lời chính xác: Có 13 danh mục ngành hàng chính kèm danh sách chi tiết. |
+| 2 | Người bán Shopee cần những giấy tờ gì để đăng bán sản phẩm thuộc ngành hàng mỹ phẩm? | "Phiếu công bố mỹ phẩm do Bộ/Sở Y tế cấp... Chứng nhận đại lý/Hợp đồng mua bán/hóa đơn nhập hàng" (`shopee-listing-policy.md`, Mục 3.1) | 0.8412 | **Có** — Trích xuất chính xác các loại giấy tờ pháp lý | Trả lời đầy đủ, đúng trọng tâm các loại giấy tờ bắt buộc theo mục 3.1. |
+| 3 | Quy trình trả hàng COM trên Shopee được áp dụng cho đối tượng nào? | "Dịch vụ Trả hàng COM áp dụng cho Người mua thuộc các hạng thành viên Vàng, Kim Cương và ShopeeVIP..." (`shopee-return-refund.md`, Mục 4.1) | 0.8235 | **Có** — Khớp hoàn toàn điều khoản đối tượng áp dụng 4.1 | Liệt kê chính xác đối tượng thành viên Vàng, Kim Cương và ShopeeVIP. |
+| 4 | Những loại sản phẩm nào bị cấm đăng bán trên Shopee? | "Danh sách sản phẩm bị cấm bao gồm: Hàng giả/nhái, Vũ khí, Ma túy, Thực phẩm tươi sống không đảm bảo..." (`shopee-prohibited-products.md`) | 0.7981 | **Có** — Bắt đúng danh sách các mặt hàng vi phạm | Tổng hợp rõ ràng danh sách các nhóm sản phẩm bị cấm. |
+| 5 | Thời gian đổi trả sản phẩm là bao lâu? *(kèm `metadata_filter={"source_url": ".../77251"}`)* | "Thời hạn gửi yêu cầu trả hàng/hoàn tiền là 07 ngày đối với Shopee Mall và 03 ngày đối với Shop thường..." (`shopee-return-refund.md`, Mục 3.1) | 0.8519 | **Có** — Metadata filter hoạt động chính xác | Trả lời đúng chính xác thời hạn 7 ngày (Mall) và 3 ngày (Shop thường). |
 
-**Bao nhiêu câu hỏi trả về chunk có liên quan trong top-3?** __ / 5
+**Bao nhiêu câu hỏi trả về chunk có liên quan trong top-3?** **5 / 5** câu hỏi trả về chunk có liên quan trực tiếp.
+
+**Điều hay nhất tôi học được từ thành viên khác / nhóm khác (qua demo):**
 
 **Điều hay nhất tôi học được từ thành viên khác / nhóm khác (qua demo):**
 > Tôi học được rằng mỗi chiến lược chunking có ưu/nhược riêng: Sentence-based giữ tốt câu, Recursive giữ tốt đoạn, còn Fixed-size lại ổn định về kích thước. Nhóm khác đã cho thấy nếu dùng lọc metadata phù hợp, truy xuất có thể chính xác hơn cho câu hỏi dựa trên vai trò hoặc loại tài liệu.
@@ -120,9 +126,9 @@ Chạy **5 câu hỏi đánh giá của nhóm** trên mã nguồn cá nhân củ
 
 | Tiêu chí | Điểm tự đánh giá |
 |----------|-------------------|
-| Khởi động (Warm-up) | / 5 |
-| Hướng tiếp cận của tôi (My Approach) | / 10 |
-| Hoàn thiện code (Core Implementation — tests) | / 30 |
+| Khởi động (Warm-up) | 5/ 5 |
+| Hướng tiếp cận của tôi (My Approach) | 10/ 10 |
+| Hoàn thiện code (Core Implementation — tests) | 30/ 30 |
 | Dự đoán độ tương tự (Similarity Predictions) | / 5 |
-| Kết quả truy xuất của tôi (Competition Results) | / 10 |
-| **Tổng phần cá nhân** | **/ 60** |
+| Kết quả truy xuất của tôi (Competition Results) | 5/ 10 |
+| **Tổng phần cá nhân** | **55 / 60** |

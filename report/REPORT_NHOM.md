@@ -76,10 +76,9 @@ Chạy `ChunkingStrategyComparator().compare()` trên 2-3 tài liệu:
 - **Benchmark script:** `python -m src.TranAnThang_2A202601756.bench`.
 
 **Thành viên 4 – Trần Kiều Hạnh (2A202601760)**
-- **Loại chiến lược:** SentenceChunker (`max_sentences_per_chunk=2`).
-- **Tham số:** 2 câu/chunk, corpus `data/k4_ecommerce`.
-- **Mô tả & lý do chọn:** Cùng ý tưởng sentence như thành viên 1 nhưng chunk nhỏ hơn (2 câu) để đo mức ảnh hưởng của kích thước chunk lên precision — chunk nhỏ hơn ⇒ nhiều chunk hơn (299) nhưng đáp án dễ bị "nằm giữa" các chunk hơn.
-- **Benchmark script:** `python src/TranKieuHanh_2A202601760/bench.py`.
+- **Loại chiến lược:** SentenceChunker (max_sentences_per_chunk=3)
+- **Mô tả & lý do chọn cho chủ đề này:** Chọn SentenceChunker với tham số 3 câu/chunk nhằm đánh giá độc lập hiệu quả của việc bảo toàn ranh giới ngữ nghĩa câu đối với văn bản quy định/chính sách e-commerce. Việc gom đúng 3 câu liên tiếp giúp chunk duy trì dung lượng vừa đủ (tránh quá tải nhiễu như chunk dung lượng lớn), đồng thời không ngắt đôi ngữ cảnh điều kiện — hành vi vốn là điểm yếu của FixedSizeChunker.
+- **Code snippet / Script:** Dùng SentenceChunker(max_sentences_per_chunk=3). Script chạy: `python src/TranKieuHanh_2A202601760/bench.py` 
 
 **Thành viên 5 – Lương Bảo Long (2A202601682)**
 - **Loại chiến lược:** RecursiveChunker (`chunk_size=400`).
